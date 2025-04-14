@@ -1,0 +1,55 @@
+services:
+  nats:
+    image: nats:2.11.1
+    ports:
+      - 4222:4222
+    command: --user root --pass root -js
+    restart: always
+
+
+  nats-setup:
+    depends_on:
+      - nats
+    image: bitnami/natscli:0.2.1
+    volumes:
+      - ./nats-setup.sh:/opt/app/nats-setup.sh
+    entrypoint: [ "sh", "-c", "/opt/app/nats-setup.sh && exit 0"]
+
+  example-basic-workflow:
+    depends_on:
+      - nats-setup
+    image: golang:1.24-alpine3.20
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go mod tidy && go run examples/basic/cmd/workflow/main.go'
+    restart: always
+    environment: &common_env
+      NATS_HOST: nats
+      NATS_PORT: 4222
+      NATS_USER: root
+      NATS_PASSWORD: root
+      NATS_STREAM_PREFIX: local
+      NATS_CONSUMER_ID_PREFIX: local
+
+  example-basic-worker-a:
+    depends_on:
+      - nats-setup
+    image: golang:1.24-alpine3.20
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go mod tidy && go run examples/basic/cmd/worker-a/main.go'
+    restart: always
+    environment: *common_env
+  
+  example-basic-worker-b:
+    depends_on:
+      - nats-setup
+    image: golang:1.24-alpine3.20
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go mod tidy && go run examples/basic/cmd/worker-b/main.go'
+    restart: always
+    environment: *common_env
