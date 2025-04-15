@@ -3,6 +3,7 @@ module spider-go
 go 1.24.0
 
 require (
+	github.com/expr-lang/expr v1.17.2
 	github.com/nats-io/nats.go v1.41.1
 	github.com/sethvargo/go-envconfig v1.2.0
 	github.com/targc/xnats-go v1.0.0
