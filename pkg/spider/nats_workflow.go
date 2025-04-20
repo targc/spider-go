@@ -121,6 +121,7 @@ func (m *NATSWorkflowMessengerAdapter) ListenOutputMessages(ctx context.Context,
 					Timestamp: metadata.Timestamp,
 				},
 				OutputMessage{
+					SessionID:        b.SessionID,
 					WorkflowActionID: b.WorkflowActionID,
 					MetaOutput:       b.MetaOutput,
 					Values:           b.Values,
@@ -151,6 +152,7 @@ func (m *NATSWorkflowMessengerAdapter) SendInputMessage(ctx context.Context, mes
 	subject := buildInputSubject(m.natsStreamPrefix)
 
 	b, err := json.Marshal(NatsInputMessage{
+		SessionID:        message.SessionID,
 		WorkflowActionID: message.WorkflowActionID,
 		Values:           message.Values,
 	})

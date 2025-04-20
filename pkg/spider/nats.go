@@ -3,6 +3,7 @@ package spider
 import "fmt"
 
 type NatsOutputMessage struct {
+	SessionID        string `json:"session_id"`
 	WorkflowActionID string `json:"workflow_action_id"`
 	ActionID         string `json:"action_id"`
 	MetaOutput       string `json:"meta_output"`
@@ -10,6 +11,7 @@ type NatsOutputMessage struct {
 }
 
 type NatsInputMessage struct {
+	SessionID        string `json:"session_id"`
 	WorkflowActionID string `json:"workflow_action_id"`
 	ActionID         string `json:"action_id"`
 	Values           string `json:"values"`

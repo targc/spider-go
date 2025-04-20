@@ -5,17 +5,6 @@ import (
 	"time"
 )
 
-type OutputMessageContext struct {
-	Context   context.Context
-	Timestamp time.Time
-}
-
-type OutputMessage struct {
-	WorkflowActionID string
-	MetaOutput       string
-	Values           string
-}
-
 type InputMessageContext struct {
 	Context    context.Context
 	Timestamp  time.Time
@@ -23,6 +12,19 @@ type InputMessageContext struct {
 }
 
 type InputMessage struct {
+	SessionID        string
 	WorkflowActionID string
+	Values           string
+}
+
+type OutputMessageContext struct {
+	Context   context.Context
+	Timestamp time.Time
+}
+
+type OutputMessage struct {
+	SessionID        string
+	WorkflowActionID string
+	MetaOutput       string
 	Values           string
 }

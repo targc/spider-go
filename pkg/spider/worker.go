@@ -30,6 +30,7 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 
 			c.SendOutput = func(metaOutput string, values string) error {
 				err := w.SendOutputMessage(c.Context, OutputMessage{
+					SessionID:        m.SessionID,
 					WorkflowActionID: m.WorkflowActionID,
 					MetaOutput:       metaOutput,
 					Values:           values,
@@ -57,6 +58,7 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 
 func (w *Worker) SendOutputMessage(ctx context.Context, m OutputMessage) error {
 	err := w.messenger.SendOutputMessage(ctx, OutputMessage{
+		SessionID:        m.SessionID,
 		WorkflowActionID: m.WorkflowActionID,
 		MetaOutput:       m.MetaOutput,
 		Values:           m.Values,

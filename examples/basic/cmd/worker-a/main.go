@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -37,6 +38,7 @@ func main() {
 			}
 
 			workerA.SendOutputMessage(ctx, spider.OutputMessage{
+				SessionID:        fmt.Sprint(time.Now().Unix()),
 				WorkflowActionID: "aaaaa",
 				MetaOutput:       "triggered",
 				Values:           string(outputb),
