@@ -12,7 +12,6 @@ type OutputMessageContext struct {
 
 type OutputMessage struct {
 	WorkflowActionID string
-	ActionID         string
 	MetaOutput       string
 	Values           string
 }
@@ -25,6 +24,5 @@ type InputMessageContext struct {
 
 type InputMessage struct {
 	WorkflowActionID string
-	ActionID         string
 	Values           string
 }

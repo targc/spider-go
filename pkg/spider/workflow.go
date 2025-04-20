@@ -101,7 +101,6 @@ func (w *Workflow) Run(ctx context.Context) error {
 
 				err = w.messenger.SendInputMessage(ctx, InputMessage{
 					WorkflowActionID: dep.ID,
-					ActionID:         dep.ActionID,
 					Values:           string(nextInputb),
 				})
 

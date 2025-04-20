@@ -129,7 +129,6 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 				},
 				InputMessage{
 					WorkflowActionID: b.WorkflowActionID,
-					ActionID:         b.ActionID,
 					Values:           b.Values,
 				},
 			)
@@ -159,7 +158,6 @@ func (m *NATSWorkerMessengerAdapter) SendOutputMessage(ctx context.Context, mess
 
 	b, err := json.Marshal(NatsOutputMessage{
 		WorkflowActionID: message.WorkflowActionID,
-		ActionID:         message.ActionID,
 		MetaOutput:       message.MetaOutput,
 		Values:           message.Values,
 	})
