@@ -13,10 +13,11 @@ type MockWorkflowStorageAdapter struct {
 func (w *MockWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context, workflowActionID string) (*spider.WorkflowAction, error) {
 
 	switch workflowActionID {
-	case "test-workflow-action-a":
+	case "aaaaa":
 		return &spider.WorkflowAction{
 			ID:         workflowActionID,
-			WorkflowID: "test-workflow-a",
+			Key:        "test-workflow-action-a",
+			WorkflowID: "z",
 			ActionID:   "test-action-a",
 		}, nil
 	}
@@ -27,10 +28,11 @@ func (w *MockWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context, wo
 func (w *MockWorkflowStorageAdapter) QueryWorkflowActionDependencies(ctx context.Context, parentWorkflowActionID, metaOutput string) ([]spider.WorkflowAction, error) {
 
 	switch parentWorkflowActionID {
-	case "test-workflow-action-a":
+	case "aaaaa":
 		return []spider.WorkflowAction{
 			{
-				ID:         "test-workflow-action-b",
+				ID:         "bbbbb",
+				Key:        "test-workflow-action-b",
 				WorkflowID: "test-workflow-a",
 				ActionID:   "test-action-b",
 			},
