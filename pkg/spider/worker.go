@@ -4,25 +4,25 @@ import (
 	"context"
 )
 
-type NATSAdapterWorker struct {
+type Worker struct {
 	messenger WorkerMessengerAdapter
 	actionID  string
 }
 
-func InitDefaultAdapterWorker(
+func InitDefaultWorker(
 	ctx context.Context,
 	actionID string,
-) (*NATSAdapterWorker, error) {
+) (*Worker, error) {
 	messenger, err := InitNATSWorkerMessengerAdapter(ctx, actionID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &NATSAdapterWorker{messenger, actionID}, nil
+	return &Worker{messenger, actionID}, nil
 }
 
-func (w *NATSAdapterWorker) Run(ctx context.Context, h func(c InputMessageContext, m InputMessage) error) error {
+func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputMessage) error) error {
 
 	err := w.messenger.ListenInputMessages(
 		ctx,
@@ -56,7 +56,7 @@ func (w *NATSAdapterWorker) Run(ctx context.Context, h func(c InputMessageContex
 	return err
 }
 
-func (w *NATSAdapterWorker) SendOutputMessage(ctx context.Context, m OutputMessage) error {
+func (w *Worker) SendOutputMessage(ctx context.Context, m OutputMessage) error {
 	err := w.messenger.SendOutputMessage(ctx, OutputMessage{
 		WorkflowActionID: m.WorkflowActionID,
 		ActionID:         w.actionID,
@@ -71,7 +71,7 @@ func (w *NATSAdapterWorker) SendOutputMessage(ctx context.Context, m OutputMessa
 	return nil
 }
 
-func (w *NATSAdapterWorker) Close(ctx context.Context) error {
+func (w *Worker) Close(ctx context.Context) error {
 
 	err := w.messenger.Close(ctx)
 

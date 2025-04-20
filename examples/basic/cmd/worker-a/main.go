@@ -16,7 +16,7 @@ func main() {
 
 	// ================= WORKER [A] =================
 
-	workerA, err := spider.InitDefaultAdapterWorker(ctx, "test-action-a")
+	workerA, err := spider.InitDefaultWorker(ctx, "test-action-a")
 
 	if err != nil {
 		panic(err)
