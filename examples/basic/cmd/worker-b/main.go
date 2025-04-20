@@ -21,7 +21,7 @@ func main() {
 		panic(err)
 	}
 
-	go workerB.Run(ctx, func(c spider.InputMessageContext, m spider.InputMessage) (*spider.RunOutput, error) {
+	go workerB.Run(ctx, func(c spider.InputMessageContext, m spider.InputMessage) error {
 
 		slog.Info("[process] received input")
 
@@ -32,13 +32,16 @@ func main() {
 		outputb, err := json.Marshal(output)
 
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		return &spider.RunOutput{
-			MetaOutput: "success",
-			Values:     outputb,
-		}, nil
+		err = c.SendOutput("success", outputb)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 
 	// ==============================================

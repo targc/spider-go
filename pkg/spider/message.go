@@ -18,8 +18,9 @@ type OutputMessage struct {
 }
 
 type InputMessageContext struct {
-	Context   context.Context
-	Timestamp time.Time
+	Context    context.Context
+	Timestamp  time.Time
+	SendOutput func(metaOutput string, values []byte) error
 }
 
 type InputMessage struct {

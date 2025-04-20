@@ -4,11 +4,6 @@ import (
 	"context"
 )
 
-type RunOutput struct {
-	MetaOutput string
-	Values     []byte
-}
-
 type NATSAdapterWorker struct {
 	messenger WorkerMessengerAdapter
 	actionID  string
@@ -27,24 +22,28 @@ func InitDefaultAdapterWorker(
 	return &NATSAdapterWorker{messenger, actionID}, nil
 }
 
-func (w *NATSAdapterWorker) Run(ctx context.Context, h func(c InputMessageContext, m InputMessage) (*RunOutput, error)) error {
+func (w *NATSAdapterWorker) Run(ctx context.Context, h func(c InputMessageContext, m InputMessage) error) error {
 
 	err := w.messenger.ListenInputMessages(
 		ctx,
 		func(c InputMessageContext, m InputMessage) error {
 
-			output, err := h(c, m)
+			c.SendOutput = func(metaOutput string, values []byte) error {
+				err := w.SendOutputMessage(c.Context, OutputMessage{
+					WorkflowActionID: m.WorkflowActionID,
+					ActionID:         m.ActionID,
+					MetaOutput:       metaOutput,
+					Values:           values,
+				})
 
-			if err != nil {
-				return err
+				if err != nil {
+					return err
+				}
+
+				return nil
 			}
 
-			err = w.messenger.SendOutputMessage(c.Context, OutputMessage{
-				WorkflowActionID: m.WorkflowActionID,
-				ActionID:         m.ActionID,
-				MetaOutput:       output.MetaOutput,
-				Values:           output.Values,
-			})
+			err := h(c, m)
 
 			if err != nil {
 				return err
