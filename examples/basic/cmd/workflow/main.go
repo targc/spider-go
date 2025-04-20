@@ -62,8 +62,8 @@ func main() {
 
 	// ==============================================
 
-	nctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
-	defer cancel()
+	nctx, ncancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer ncancel()
 
 	<-nctx.Done()
 

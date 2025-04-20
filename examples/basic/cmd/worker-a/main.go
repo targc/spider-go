@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -25,12 +26,20 @@ func main() {
 		for {
 			time.Sleep(time.Second * 10)
 
-			workerA.SendOutputMessage(ctx, spider.OutputMessageExternal{
+			output := map[string]interface{}{
+				"value": "hello",
+			}
+
+			outputb, err := json.Marshal(output)
+
+			if err != nil {
+				continue
+			}
+
+			workerA.SendOutputMessage(ctx, spider.OutputMessage{
 				WorkflowActionID: "test-workflow-action-a",
 				MetaOutput:       "triggered",
-				Values: map[string]interface{}{
-					"value": "hello",
-				},
+				Values:           outputb,
 			})
 
 			slog.Info("[process] sent")
@@ -39,8 +48,8 @@ func main() {
 
 	// ==============================================
 
-	nctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
-	defer cancel()
+	nctx, ncancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer ncancel()
 
 	<-nctx.Done()
 

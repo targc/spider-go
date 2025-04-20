@@ -14,7 +14,7 @@ type OutputMessage struct {
 	WorkflowActionID string
 	ActionID         string
 	MetaOutput       string
-	Values           Values
+	Values           []byte
 }
 
 type InputMessageContext struct {
@@ -25,5 +25,5 @@ type InputMessageContext struct {
 type InputMessage struct {
 	WorkflowActionID string
 	ActionID         string
-	Values           Values
+	Values           []byte
 }

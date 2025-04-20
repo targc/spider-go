@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -20,22 +21,30 @@ func main() {
 		panic(err)
 	}
 
-	go workerB.Run(ctx, func(c spider.InputMessageContext, m spider.InputMessage) (*spider.NATSHandlerOutput, error) {
+	go workerB.Run(ctx, func(c spider.InputMessageContext, m spider.InputMessage) (*spider.RunOutput, error) {
 
 		slog.Info("[process] received input")
 
-		return &spider.NATSHandlerOutput{
+		output := map[string]interface{}{
+			"value": "1",
+		}
+
+		outputb, err := json.Marshal(output)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return &spider.RunOutput{
 			MetaOutput: "success",
-			Values: map[string]interface{}{
-				"value": "1",
-			},
+			Values:     outputb,
 		}, nil
 	})
 
 	// ==============================================
 
-	nctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
-	defer cancel()
+	nctx, ncancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer ncancel()
 
 	<-nctx.Done()
 
