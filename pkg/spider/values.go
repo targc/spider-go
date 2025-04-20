@@ -1,3 +1,3 @@
 package spider
 
-type Values map[string]string
+type Values map[string]interface{}

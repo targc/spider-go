@@ -26,7 +26,7 @@ func main() {
 
 		return &spider.NATSHandlerOutput{
 			MetaOutput: "success",
-			Values: map[string]string{
+			Values: map[string]interface{}{
 				"value": "1",
 			},
 		}, nil

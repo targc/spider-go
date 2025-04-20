@@ -28,7 +28,7 @@ func main() {
 			workerA.SendOutputMessage(ctx, spider.OutputMessageExternal{
 				WorkflowNodeID: "test-workflow-node-a",
 				MetaOutput:     "triggered",
-				Values: map[string]string{
+				Values: map[string]interface{}{
 					"value": "hello",
 				},
 			})
