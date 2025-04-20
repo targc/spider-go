@@ -28,7 +28,7 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 		ctx,
 		func(c InputMessageContext, m InputMessage) error {
 
-			c.SendOutput = func(metaOutput string, values []byte) error {
+			c.SendOutput = func(metaOutput string, values string) error {
 				err := w.SendOutputMessage(c.Context, OutputMessage{
 					WorkflowActionID: m.WorkflowActionID,
 					ActionID:         m.ActionID,

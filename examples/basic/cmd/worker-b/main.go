@@ -35,7 +35,7 @@ func main() {
 			return err
 		}
 
-		err = c.SendOutput("success", outputb)
+		err = c.SendOutput("success", string(outputb))
 
 		if err != nil {
 			return err

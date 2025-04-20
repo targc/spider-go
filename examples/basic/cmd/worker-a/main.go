@@ -37,9 +37,9 @@ func main() {
 			}
 
 			workerA.SendOutputMessage(ctx, spider.OutputMessage{
-				WorkflowActionID: "test-workflow-action-a",
+				WorkflowActionID: "aaaaa",
 				MetaOutput:       "triggered",
-				Values:           outputb,
+				Values:           string(outputb),
 			})
 
 			slog.Info("[process] sent")

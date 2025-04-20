@@ -14,17 +14,17 @@ type OutputMessage struct {
 	WorkflowActionID string
 	ActionID         string
 	MetaOutput       string
-	Values           []byte
+	Values           string
 }
 
 type InputMessageContext struct {
 	Context    context.Context
 	Timestamp  time.Time
-	SendOutput func(metaOutput string, values []byte) error
+	SendOutput func(metaOutput string, values string) error
 }
 
 type InputMessage struct {
 	WorkflowActionID string
 	ActionID         string
-	Values           []byte
+	Values           string
 }
