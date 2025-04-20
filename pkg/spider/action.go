@@ -1,7 +1,7 @@
 package spider
 
-type WorkflowNode struct {
+type WorkflowAction struct {
 	ID         string
 	WorkflowID string
-	NodeID     string
+	ActionID   string
 }

@@ -15,7 +15,7 @@ func main() {
 
 	// ================= WORKER [A] =================
 
-	workerA, err := spider.InitNATSAdapterWorker(ctx, "test-node-a")
+	workerA, err := spider.InitDefaultAdapterWorker(ctx, "test-action-a")
 
 	if err != nil {
 		panic(err)
@@ -26,8 +26,8 @@ func main() {
 			time.Sleep(time.Second * 10)
 
 			workerA.SendOutputMessage(ctx, spider.OutputMessageExternal{
-				WorkflowNodeID: "test-workflow-node-a",
-				MetaOutput:     "triggered",
+				WorkflowActionID: "test-workflow-action-a",
+				MetaOutput:       "triggered",
 				Values: map[string]interface{}{
 					"value": "hello",
 				},

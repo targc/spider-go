@@ -11,10 +11,10 @@ type OutputMessageContext struct {
 }
 
 type OutputMessage struct {
-	WorkflowNodeID string
-	NodeID         string
-	MetaOutput     string
-	Values         Values
+	WorkflowActionID string
+	ActionID         string
+	MetaOutput       string
+	Values           Values
 }
 
 type InputMessageContext struct {
@@ -23,7 +23,7 @@ type InputMessageContext struct {
 }
 
 type InputMessage struct {
-	WorkflowNodeID string
-	NodeID         string
-	Values         Values
+	WorkflowActionID string
+	ActionID         string
+	Values           Values
 }

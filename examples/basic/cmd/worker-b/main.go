@@ -14,7 +14,7 @@ func main() {
 
 	// ================= WORKER [B] =================
 
-	workerB, err := spider.InitNATSAdapterWorker(ctx, "edge.function_name")
+	workerB, err := spider.InitDefaultAdapterWorker(ctx, "edge.function_name")
 
 	if err != nil {
 		panic(err)

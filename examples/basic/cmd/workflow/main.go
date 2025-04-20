@@ -10,29 +10,29 @@ import (
 type MockWorkflowStorageAdapter struct {
 }
 
-func (w *MockWorkflowStorageAdapter) QueryWorkflowNode(ctx context.Context, workflowNodeID string) (*spider.WorkflowNode, error) {
+func (w *MockWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context, workflowActionID string) (*spider.WorkflowAction, error) {
 
-	switch workflowNodeID {
-	case "test-workflow-node-a":
-		return &spider.WorkflowNode{
-			ID:         workflowNodeID,
+	switch workflowActionID {
+	case "test-workflow-action-a":
+		return &spider.WorkflowAction{
+			ID:         workflowActionID,
 			WorkflowID: "test-workflow-a",
-			NodeID:     "test-node-a",
+			ActionID:   "test-action-a",
 		}, nil
 	}
 
 	return nil, nil
 }
 
-func (w *MockWorkflowStorageAdapter) QueryWorkflowNodeDependencies(ctx context.Context, parentWorkflowNodeID, metaOutput string) ([]spider.WorkflowNode, error) {
+func (w *MockWorkflowStorageAdapter) QueryWorkflowActionDependencies(ctx context.Context, parentWorkflowActionID, metaOutput string) ([]spider.WorkflowAction, error) {
 
-	switch parentWorkflowNodeID {
-	case "test-workflow-node-a":
-		return []spider.WorkflowNode{
+	switch parentWorkflowActionID {
+	case "test-workflow-action-a":
+		return []spider.WorkflowAction{
 			{
-				ID:         "test-workflow-node-b",
+				ID:         "test-workflow-action-b",
 				WorkflowID: "test-workflow-a",
-				NodeID:     "test-node-b",
+				ActionID:   "test-action-b",
 			},
 		}, nil
 	}

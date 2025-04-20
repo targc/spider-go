@@ -10,27 +10,27 @@ type NATSHandlerOutput struct {
 }
 
 type OutputMessageExternal struct {
-	WorkflowNodeID string
-	MetaOutput     string
-	Values         Values
+	WorkflowActionID string
+	MetaOutput       string
+	Values           Values
 }
 
 type NATSAdapterWorker struct {
 	messenger WorkerMessengerAdapter
-	nodeID    string
+	actionID  string
 }
 
-func InitNATSAdapterWorker(
+func InitDefaultAdapterWorker(
 	ctx context.Context,
-	nodeID string,
+	actionID string,
 ) (*NATSAdapterWorker, error) {
-	messenger, err := InitNATSWorkerMessengerAdapter(ctx, nodeID)
+	messenger, err := InitNATSWorkerMessengerAdapter(ctx, actionID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &NATSAdapterWorker{messenger, nodeID}, nil
+	return &NATSAdapterWorker{messenger, actionID}, nil
 }
 
 func (w *NATSAdapterWorker) Run(ctx context.Context, h func(c InputMessageContext, m InputMessage) (*NATSHandlerOutput, error)) error {
@@ -46,10 +46,10 @@ func (w *NATSAdapterWorker) Run(ctx context.Context, h func(c InputMessageContex
 			}
 
 			err = w.messenger.SendOutputMessage(c.Context, OutputMessage{
-				WorkflowNodeID: m.WorkflowNodeID,
-				NodeID:         m.NodeID,
-				MetaOutput:     output.MetaOutput,
-				Values:         output.Values,
+				WorkflowActionID: m.WorkflowActionID,
+				ActionID:         m.ActionID,
+				MetaOutput:       output.MetaOutput,
+				Values:           output.Values,
 			})
 
 			if err != nil {
@@ -65,10 +65,10 @@ func (w *NATSAdapterWorker) Run(ctx context.Context, h func(c InputMessageContex
 
 func (w *NATSAdapterWorker) SendOutputMessage(ctx context.Context, m OutputMessageExternal) error {
 	err := w.messenger.SendOutputMessage(ctx, OutputMessage{
-		WorkflowNodeID: m.WorkflowNodeID,
-		NodeID:         w.nodeID,
-		MetaOutput:     m.MetaOutput,
-		Values:         m.Values,
+		WorkflowActionID: m.WorkflowActionID,
+		ActionID:         w.actionID,
+		MetaOutput:       m.MetaOutput,
+		Values:           m.Values,
 	})
 
 	if err != nil {

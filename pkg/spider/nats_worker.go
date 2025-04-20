@@ -18,12 +18,12 @@ type NATSWorkerMessengerAdapter struct {
 	c                *xnats.Consumer
 	cctx             jetstream.ConsumeContext
 	natsStreamPrefix string
-	nodeID           string
+	actionID         string
 }
 
 var _ WorkerMessengerAdapter = &NATSWorkerMessengerAdapter{}
 
-func InitNATSWorkerMessengerAdapter(ctx context.Context, nodeID string) (*NATSWorkerMessengerAdapter, error) {
+func InitNATSWorkerMessengerAdapter(ctx context.Context, actionID string) (*NATSWorkerMessengerAdapter, error) {
 	type Env struct {
 		NATSHost             string `env:"NATS_HOST,required"`
 		NATSPort             int    `env:"NATS_PORT,required"`
@@ -55,13 +55,13 @@ func InitNATSWorkerMessengerAdapter(ctx context.Context, nodeID string) (*NATSWo
 	p := nc.Producer()
 
 	inputStream := buildInputSubject(env.NATSStreamPrefix)
-	consumerID := buildWorkerConsumerID(env.NATSConsumerIDPrefix, nodeID)
+	consumerID := buildWorkerConsumerID(env.NATSConsumerIDPrefix, actionID)
 
 	slog.Info(
 		"worker",
 		slog.String("input_stream", inputStream),
 		slog.String("consumer_id", consumerID),
-		slog.String("node_id", nodeID),
+		slog.String("action_id", actionID),
 	)
 
 	c, err := nc.Consumer(ctx, inputStream, consumerID)
@@ -75,7 +75,7 @@ func InitNATSWorkerMessengerAdapter(ctx context.Context, nodeID string) (*NATSWo
 		p:                p,
 		c:                c,
 		natsStreamPrefix: env.NATSStreamPrefix,
-		nodeID:           nodeID,
+		actionID:         actionID,
 	}
 
 	return &adapter, nil
@@ -118,7 +118,7 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 				return err
 			}
 
-			if b.NodeID != m.nodeID {
+			if b.ActionID != m.actionID {
 				return nil
 			}
 
@@ -128,9 +128,9 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 					Timestamp: metadata.Timestamp,
 				},
 				InputMessage{
-					WorkflowNodeID: b.WorkflowNodeID,
-					NodeID:         b.NodeID,
-					Values:         b.Values,
+					WorkflowActionID: b.WorkflowActionID,
+					ActionID:         b.ActionID,
+					Values:           b.Values,
 				},
 			)
 
@@ -158,10 +158,10 @@ func (m *NATSWorkerMessengerAdapter) SendOutputMessage(ctx context.Context, mess
 	subject := buildOutputSubject(m.natsStreamPrefix)
 
 	b, err := json.Marshal(NatsOutputMessage{
-		WorkflowNodeID: message.WorkflowNodeID,
-		NodeID:         message.NodeID,
-		MetaOutput:     message.MetaOutput,
-		Values:         message.Values,
+		WorkflowActionID: message.WorkflowActionID,
+		ActionID:         message.ActionID,
+		MetaOutput:       message.MetaOutput,
+		Values:           message.Values,
 	})
 
 	if err != nil {

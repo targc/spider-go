@@ -41,15 +41,15 @@ func (w *Workflow) Run(ctx context.Context) error {
 
 	err := w.messenger.ListenOutputMessages(ctx, func(c OutputMessageContext, m OutputMessage) error {
 
-		workflowNode, err := w.storage.QueryWorkflowNode(c.Context, m.WorkflowNodeID)
+		workflowAction, err := w.storage.QueryWorkflowAction(c.Context, m.WorkflowActionID)
 
 		if err != nil {
 			return err
 		}
 
-		_ = workflowNode // TODO:
+		_ = workflowAction // TODO:
 
-		deps, err := w.storage.QueryWorkflowNodeDependencies(c.Context, m.WorkflowNodeID, m.MetaOutput)
+		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowActionID, m.MetaOutput)
 
 		if err != nil {
 			return err
@@ -62,8 +62,8 @@ func (w *Workflow) Run(ctx context.Context) error {
 		for _, dep := range deps {
 			eg.Go(func() error {
 				err = w.messenger.SendInputMessage(ctx, InputMessage{
-					WorkflowNodeID: dep.ID,
-					NodeID:         dep.NodeID,
+					WorkflowActionID: dep.ID,
+					ActionID:         dep.ActionID,
 					Values:         m.Values, // TODO: transformer, value mapper
 				})
 

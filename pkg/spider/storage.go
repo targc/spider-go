@@ -3,7 +3,7 @@ package spider
 import "context"
 
 type WorkflowStorageAdapter interface {
-	QueryWorkflowNode(ctx context.Context, workflowNodeID string) (*WorkflowNode, error)
-	QueryWorkflowNodeDependencies(ctx context.Context, parentWorkflowNodeID, metaOutput string) ([]WorkflowNode, error)
+	QueryWorkflowAction(ctx context.Context, workflowActionID string) (*WorkflowAction, error)
+	QueryWorkflowActionDependencies(ctx context.Context, parentWorkflowActionID, metaOutput string) ([]WorkflowAction, error)
 	Close(ctx context.Context) error
 }

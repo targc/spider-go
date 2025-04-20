@@ -3,16 +3,16 @@ package spider
 import "fmt"
 
 type NatsOutputMessage struct {
-	WorkflowNodeID string `json:"workflow_node_id"`
-	NodeID         string `json:"node_id"`
-	MetaOutput     string `json:"meta_output"`
-	Values         Values `json:"values"`
+	WorkflowActionID string `json:"workflow_action_id"`
+	ActionID         string `json:"action_id"`
+	MetaOutput       string `json:"meta_output"`
+	Values           Values `json:"values"`
 }
 
 type NatsInputMessage struct {
-	WorkflowNodeID string `json:"workflow_node_id"`
-	NodeID         string `json:"node_id"`
-	Values         Values `json:"values"`
+	WorkflowActionID string `json:"workflow_action_id"`
+	ActionID         string `json:"action_id"`
+	Values           Values `json:"values"`
 }
 
 func buildInputSubject(prefix string) string {
@@ -27,6 +27,6 @@ func buildWorkflowConsumerID(prefix string) string {
 	return fmt.Sprintf("%s-workflow", prefix)
 }
 
-func buildWorkerConsumerID(prefix, nodeID string) string {
-	return fmt.Sprintf("%s-worker-%s", prefix, nodeID)
+func buildWorkerConsumerID(prefix, actionID string) string {
+	return fmt.Sprintf("%s-worker-%s", prefix, actionID)
 }
