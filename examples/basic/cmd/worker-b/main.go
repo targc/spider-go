@@ -15,7 +15,7 @@ func main() {
 
 	// ================= WORKER [B] =================
 
-	workerB, err := spider.InitDefaultAdapterWorker(ctx, "edge.function_name")
+	workerB, err := spider.InitDefaultAdapterWorker(ctx, "test-action-b")
 
 	if err != nil {
 		panic(err)
