@@ -53,12 +53,6 @@ func (w *Workflow) Run(ctx context.Context) error {
 
 		_ = workflowAction // TODO:
 
-		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowActionID, m.MetaOutput)
-
-		if err != nil {
-			return err
-		}
-
 		wvalues := map[string]interface{}{}
 
 		err = json.Unmarshal([]byte(m.Values), &wvalues)
@@ -67,11 +61,21 @@ func (w *Workflow) Run(ctx context.Context) error {
 			return err
 		}
 
+		newContextKey := workflowAction.Key
+
+		newContext := map[string]interface{}{
+			"output": wvalues,
+		}
+
 		// TODO: give previous actions context
 		wcontext := map[string]interface{}{
-			workflowAction.Key: map[string]interface{}{
-				"output": wvalues,
-			},
+			newContextKey: newContext,
+		}
+
+		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowActionID, m.MetaOutput)
+
+		if err != nil {
+			return err
 		}
 
 		eg := errgroup.Group{}
