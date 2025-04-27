@@ -63,13 +63,14 @@ func (w *Workflow) Run(ctx context.Context) error {
 
 		newContextKey := workflowAction.Key
 
-		newContext := map[string]interface{}{
+		newContextVal := map[string]interface{}{
 			"output": wvalues,
 		}
 
-		// TODO: give previous actions context
-		wcontext := map[string]interface{}{
-			newContextKey: newContext,
+		wcontext, err := w.storage.TryAddSessionContext(ctx, m.SessionID, newContextKey, newContextVal)
+
+		if err != nil {
+			return err
 		}
 
 		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowActionID, m.MetaOutput)
