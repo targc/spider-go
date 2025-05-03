@@ -12,9 +12,25 @@ type InputMessageContext struct {
 }
 
 type InputMessage struct {
-	SessionID        string
-	WorkflowActionID string
-	Values           string
+	SessionID  string
+	WorkflowID string
+	// TODO
+	// WorkflowActionID string
+	Key      string
+	ActionID string
+	Values   string
+}
+
+func (m *InputMessage) ToOutputMessage(metaOutput, values string) OutputMessage {
+	return OutputMessage{
+		SessionID:  m.SessionID,
+		WorkflowID: m.WorkflowID,
+		// TODO
+		// WorkflowActionID: m.WorkflowActionID,
+		Key:        m.Key,
+		MetaOutput: metaOutput,
+		Values:     values,
+	}
 }
 
 type OutputMessageContext struct {
@@ -23,8 +39,12 @@ type OutputMessageContext struct {
 }
 
 type OutputMessage struct {
-	SessionID        string
-	WorkflowActionID string
-	MetaOutput       string
-	Values           string
+	SessionID  string
+	WorkflowID string
+	// TODO
+	// WorkflowActionID string
+	Key        string
+	ActionID   string
+	MetaOutput string
+	Values     string
 }
