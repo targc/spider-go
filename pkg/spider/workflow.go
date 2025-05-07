@@ -27,9 +27,14 @@ func InitWorkflow(
 
 func InitDefaultWorkflow(
 	ctx context.Context,
-	storage WorkflowStorageAdapter,
 ) (*Workflow, error) {
 	messenger, err := InitNATSWorkflowMessengerAdapter(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	storage, err := InitMongodDBWorkflowStorageAdapter(ctx)
 
 	if err != nil {
 		return nil, err
@@ -39,6 +44,14 @@ func InitDefaultWorkflow(
 		messenger,
 		storage,
 	}, nil
+}
+
+func (w *Workflow) Messenger() WorkflowMessengerAdapter {
+	return w.messenger
+}
+
+func (w *Workflow) Storage() WorkflowStorageAdapter {
+	return w.storage
 }
 
 func (w *Workflow) Run(ctx context.Context) error {
@@ -73,7 +86,7 @@ func (w *Workflow) Run(ctx context.Context) error {
 			"output": wvalues,
 		}
 
-		wcontext, err := w.storage.TryAddSessionContext(ctx, m.SessionID, m.Key, newContextVal)
+		wcontext, err := w.storage.TryAddSessionContext(ctx, m.WorkflowID, m.SessionID, m.Key, newContextVal)
 
 		if err != nil {
 			slog.Error("TryAddSessionContext failed", slog.Any("error", err.Error()))
