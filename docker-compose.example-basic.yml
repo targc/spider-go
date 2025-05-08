@@ -1,5 +1,6 @@
 services:
   nats:
+    container_name: nats
     image: nats:2.11.1
     ports:
       - 4222:4222
@@ -7,6 +8,7 @@ services:
     restart: always
 
   mongo:
+    container_name: mongo
     image: mongo:8.0.9
     restart: always
     ports:
@@ -18,6 +20,7 @@ services:
       - ./.volumes/mongodb:/data/db
 
   nats-setup:
+    container_name: nats-setup
     depends_on:
       - nats
     image: bitnami/natscli:0.2.1
@@ -26,6 +29,7 @@ services:
     entrypoint: [ "sh", "-c", "/opt/app/nats-setup.sh && exit 0"]
 
   example-basic-workflow:
+    container_name: example-basic-workflow
     depends_on:
       - nats-setup
     build:
@@ -47,6 +51,7 @@ services:
       MONGODB_DB_NAME: wf
 
   example-basic-worker-a:
+    container_name: example-basic-worker-a
     depends_on:
       - nats-setup
     build:
@@ -62,6 +67,7 @@ services:
       - 8081:8080
   
   example-basic-worker-b:
+    container_name: example-basic-worker-b
     depends_on:
       - nats-setup
     build:
