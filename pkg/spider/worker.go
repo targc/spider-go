@@ -13,7 +13,9 @@ func InitDefaultWorker(
 	ctx context.Context,
 	actionID string,
 ) (*Worker, error) {
-	messenger, err := InitNATSWorkerMessengerAdapter(ctx, actionID)
+	messenger, err := InitNATSWorkerMessengerAdapter(ctx, actionID, InitNATSWorkerMessengerAdapterOpt{
+		BetaAutoSetupNATS: true,
+	})
 
 	if err != nil {
 		return nil, err

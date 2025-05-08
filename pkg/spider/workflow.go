@@ -28,7 +28,9 @@ func InitWorkflow(
 func InitDefaultWorkflow(
 	ctx context.Context,
 ) (*Workflow, error) {
-	messenger, err := InitNATSWorkflowMessengerAdapter(ctx)
+	messenger, err := InitNATSWorkflowMessengerAdapter(ctx, InitNATSWorkflowMessengerAdapterOpt{
+		BetaAutoSetupNATS: true,
+	})
 
 	if err != nil {
 		return nil, err

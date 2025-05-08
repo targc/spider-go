@@ -22,7 +22,11 @@ type NATSWorkflowMessengerAdapter struct {
 
 var _ WorkflowMessengerAdapter = &NATSWorkflowMessengerAdapter{}
 
-func InitNATSWorkflowMessengerAdapter(ctx context.Context) (*NATSWorkflowMessengerAdapter, error) {
+type InitNATSWorkflowMessengerAdapterOpt struct {
+	BetaAutoSetupNATS bool
+}
+
+func InitNATSWorkflowMessengerAdapter(ctx context.Context, opt InitNATSWorkflowMessengerAdapterOpt) (*NATSWorkflowMessengerAdapter, error) {
 	type Env struct {
 		NATSHost             string `env:"NATS_HOST,required"`
 		NATSPort             int    `env:"NATS_PORT,required"`
@@ -53,6 +57,7 @@ func InitNATSWorkflowMessengerAdapter(ctx context.Context) (*NATSWorkflowMesseng
 
 	p := nc.Producer()
 
+	inputStream := buildInputSubject(env.NATSStreamPrefix)
 	outputStream := buildOutputSubject(env.NATSStreamPrefix)
 	consumerID := buildWorkflowConsumerID(env.NATSConsumerIDPrefix)
 
@@ -61,6 +66,27 @@ func InitNATSWorkflowMessengerAdapter(ctx context.Context) (*NATSWorkflowMesseng
 		slog.String("output_stream", outputStream),
 		slog.String("consumer_id", consumerID),
 	)
+
+	if opt.BetaAutoSetupNATS {
+
+		err = betaCreateJetstream(ctx, nc.JS(), inputStream)
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = betaCreateJetstream(ctx, nc.JS(), outputStream)
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = betaCreateConsumer(ctx, nc.JS(), outputStream, consumerID)
+
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	c, err := nc.Consumer(ctx, outputStream, consumerID)
 

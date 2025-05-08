@@ -3,7 +3,6 @@ package spider
 import (
 	"context"
 	"encoding/json"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/sethvargo/go-envconfig"

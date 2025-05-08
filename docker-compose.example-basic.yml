@@ -19,19 +19,19 @@ services:
     volumes:
       - ./.volumes/mongodb:/data/db
 
-  nats-setup:
-    container_name: nats-setup
-    depends_on:
-      - nats
-    image: bitnami/natscli:0.2.1
-    volumes:
-      - ./nats-setup.sh:/opt/app/nats-setup.sh
-    entrypoint: [ "sh", "-c", "/opt/app/nats-setup.sh && exit 0"]
+  # nats-setup:
+  #   container_name: nats-setup
+  #   depends_on:
+  #     - nats
+  #   image: bitnami/natscli:0.2.1
+  #   volumes:
+  #     - ./nats-setup.sh:/opt/app/nats-setup.sh
+  #   entrypoint: [ "sh", "-c", "/opt/app/nats-setup.sh && exit 0"]
 
   example-basic-workflow:
     container_name: example-basic-workflow
-    depends_on:
-      - nats-setup
+    # depends_on:
+    #   - nats-setup
     build:
       dockerfile: ./examples/basic/Dockerfile.base
       context: .
@@ -52,8 +52,8 @@ services:
 
   example-basic-worker-a:
     container_name: example-basic-worker-a
-    depends_on:
-      - nats-setup
+    # depends_on:
+    #   - nats-setup
     build:
       dockerfile: ./examples/basic/Dockerfile.base
       context: .
@@ -68,8 +68,8 @@ services:
   
   example-basic-worker-b:
     container_name: example-basic-worker-b
-    depends_on:
-      - nats-setup
+    # depends_on:
+    #   - nats-setup
     build:
       dockerfile: ./examples/basic/Dockerfile.base
       context: .

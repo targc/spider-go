@@ -23,7 +23,11 @@ type NATSWorkerMessengerAdapter struct {
 
 var _ WorkerMessengerAdapter = &NATSWorkerMessengerAdapter{}
 
-func InitNATSWorkerMessengerAdapter(ctx context.Context, actionID string) (*NATSWorkerMessengerAdapter, error) {
+type InitNATSWorkerMessengerAdapterOpt struct {
+	BetaAutoSetupNATS bool
+}
+
+func InitNATSWorkerMessengerAdapter(ctx context.Context, actionID string, opt InitNATSWorkerMessengerAdapterOpt) (*NATSWorkerMessengerAdapter, error) {
 	type Env struct {
 		NATSHost             string `env:"NATS_HOST,required"`
 		NATSPort             int    `env:"NATS_PORT,required"`
@@ -63,6 +67,14 @@ func InitNATSWorkerMessengerAdapter(ctx context.Context, actionID string) (*NATS
 		slog.String("consumer_id", consumerID),
 		slog.String("action_id", actionID),
 	)
+
+	if opt.BetaAutoSetupNATS {
+		err = betaCreateConsumer(ctx, nc.JS(), inputStream, consumerID)
+
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	c, err := nc.Consumer(ctx, inputStream, consumerID)
 
