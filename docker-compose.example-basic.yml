@@ -6,6 +6,16 @@ services:
     command: --user root --pass root -js
     restart: always
 
+  mongo:
+    image: mongo:8.0.9
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./.volumes/mongodb:/data/db
 
   nats-setup:
     depends_on:
@@ -18,11 +28,13 @@ services:
   example-basic-workflow:
     depends_on:
       - nats-setup
-    image: golang:1.24-alpine3.20
+    build:
+      dockerfile: ./examples/basic/Dockerfile.base
+      context: .
     volumes:
       - .:/opt/app
     working_dir: /opt/app
-    command: /bin/sh -c 'go mod tidy && go run examples/basic/cmd/workflow/main.go'
+    command: /bin/sh -c 'go run examples/basic/cmd/workflow/main.go'
     restart: always
     environment: &common_env
       NATS_HOST: nats
@@ -31,15 +43,19 @@ services:
       NATS_PASSWORD: root
       NATS_STREAM_PREFIX: local
       NATS_CONSUMER_ID_PREFIX: local
+      MONGODB_URI: mongodb://root:password@mongo:27017/
+      MONGODB_DB_NAME: wf
 
   example-basic-worker-a:
     depends_on:
       - nats-setup
-    image: golang:1.24-alpine3.20
+    build:
+      dockerfile: ./examples/basic/Dockerfile.base
+      context: .
     volumes:
       - .:/opt/app
     working_dir: /opt/app
-    command: /bin/sh -c 'go mod tidy && go run examples/basic/cmd/worker-a/main.go'
+    command: /bin/sh -c 'go run examples/basic/cmd/worker-a/main.go'
     restart: always
     environment: *common_env
     ports:
@@ -48,10 +64,12 @@ services:
   example-basic-worker-b:
     depends_on:
       - nats-setup
-    image: golang:1.24-alpine3.20
+    build:
+      dockerfile: ./examples/basic/Dockerfile.base
+      context: .
     volumes:
       - .:/opt/app
     working_dir: /opt/app
-    command: /bin/sh -c 'go mod tidy && go run examples/basic/cmd/worker-b/main.go'
+    command: /bin/sh -c 'go run examples/basic/cmd/worker-b/main.go'
     restart: always
     environment: *common_env

@@ -2,6 +2,8 @@ package spider
 
 import (
 	"context"
+	"encoding/json"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/sethvargo/go-envconfig"
@@ -99,7 +101,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddDep(
 	workflowID,
 	key,
 	metaOutput,
-	key2 string,
+	depKey string,
 	m map[string]Mapper,
 ) error {
 	id, err := uuid.NewV7()
@@ -113,7 +115,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddDep(
 		WorkflowID: workflowID,
 		Key:        key,
 		MetaOutput: metaOutput,
-		DepKey:     key,
+		DepKey:     depKey,
 		Map:        m,
 	}
 
@@ -128,7 +130,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddDep(
 
 func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context, workflowID, key string) (*WorkflowAction, error) {
 
-	result := w.workflowCollection.FindOne(
+	result := w.workflowActionCollection.FindOne(
 		ctx,
 		bson.D{
 			{Key: "workflow_id", Value: workflowID},
@@ -281,13 +283,27 @@ func (w *MongodDBWorkflowStorageAdapter) TryAddSessionContext(ctx context.Contex
 		sessCtxs = append(sessCtxs, sessCtx)
 	}
 
-	out := map[string]map[string]interface{}{}
+	results := map[string]map[string]interface{}{}
 
 	for _, sessCtx := range sessCtxs {
-		out[sessCtx.Key] = sessCtx.Value
+		b, err := json.Marshal(sessCtx.Value)
+
+		if err != nil {
+			return nil, err
+		}
+
+		result := map[string]interface{}{}
+
+		err = json.Unmarshal(b, &result)
+
+		if err != nil {
+			return nil, err
+		}
+
+		results[sessCtx.Key] = result
 	}
 
-	return out, nil
+	return results, nil
 }
 
 func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
@@ -296,7 +312,7 @@ func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 
 type MDWorkflowAction struct {
 	ID         string            `bson:"_id"`
-	Key        string            `bson:"keky"`        // Composite unique index
+	Key        string            `bson:"key"`         // Composite unique index
 	WorkflowID string            `bson:"workflow_id"` // Composite unique index
 	ActionID   string            `bson:"action_id"`
 	Config     map[string]string `bson:"config"`

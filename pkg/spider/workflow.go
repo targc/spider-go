@@ -193,13 +193,15 @@ func ex(env map[string]map[string]interface{}, mapping map[string]Mapper) (map[s
 
 		expression := v.Value
 
-		slog.Info("executing expression", slog.String("expression", expression))
+		slog.Info(
+			"executing expression",
+			slog.String("expression", expression),
+			slog.Any("env", env),
+		)
 
 		program, err := expr.Compile(expression, expr.Env(env))
 
 		if err != nil {
-			// output[k] = fmt.Sprintf("<compile error: %v>", err)
-			// continue
 			return nil, fmt.Errorf("error on expression %v: %s", expression, err.Error())
 		}
 
@@ -208,10 +210,10 @@ func ex(env map[string]map[string]interface{}, mapping map[string]Mapper) (map[s
 		result, err := expr.Run(program, env)
 
 		if err != nil {
-			// output[k] = fmt.Sprintf("<runtime error: %v>", err)
-			// continue
 			return nil, fmt.Errorf("error on expression %v: %s", expression, err.Error())
 		}
+
+		slog.Info("executed program", slog.String("key", k), slog.Any("result", result))
 
 		output[k] = result
 	}

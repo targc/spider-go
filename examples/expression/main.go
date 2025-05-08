@@ -53,6 +53,13 @@ func main() {
 		"len":                   func(arr any) int { return getLength(arr) },
 		"get_referred_username": func(id int) string { return fmt.Sprintf("ref_%d", id) },
 		"uuidv7":                func() string { return fmt.Sprint(time.Now().Unix()) },
+		"test": map[string]map[string]map[string]interface{}{
+			"a1": {
+				"output": {
+					"value": "kk",
+				},
+			},
+		},
 	}
 
 	mapping := map[string]string{
@@ -63,6 +70,7 @@ func main() {
 		"order_failed_rate": "!len(failed_order)/(len(success_orders) + len(failed_order))",
 		"referred_username": "!get_referred_username(success_orders[0].User.ID)",
 		"user_devices":      "!ctx1.devices",
+		"output":            "!test.a1.output.value",
 	}
 
 	output, err := ex(env, mapping)
