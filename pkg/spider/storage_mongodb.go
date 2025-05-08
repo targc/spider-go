@@ -20,7 +20,11 @@ type MongodDBWorkflowStorageAdapter struct {
 	workflowSessionContextCollection *mongo.Collection
 }
 
-func InitMongodDBWorkflowStorageAdapter(ctx context.Context) (*MongodDBWorkflowStorageAdapter, error) {
+type InitMongodDBWorkflowStorageAdapterOpt struct {
+	BetaAutoSetupSchema bool
+}
+
+func InitMongodDBWorkflowStorageAdapter(ctx context.Context, opt InitMongodDBWorkflowStorageAdapterOpt) (*MongodDBWorkflowStorageAdapter, error) {
 
 	type Env struct {
 		MongoDBURI  string `env:"MONGODB_URI,required"`
@@ -48,6 +52,71 @@ func InitMongodDBWorkflowStorageAdapter(ctx context.Context) (*MongodDBWorkflowS
 	}
 
 	db := client.Database(env.MongoDBName)
+
+	if opt.BetaAutoSetupSchema {
+		err = db.CreateCollection(ctx, "workflows")
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = db.CreateCollection(ctx, "workflow_actions")
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = db.CreateCollection(ctx, "workflow_action_deps")
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = db.CreateCollection(ctx, "workflow_session_contexts")
+
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = db.Collection("workflow_actions").Indexes().CreateOne(ctx, mongo.IndexModel{
+			Keys: bson.D{
+				{Key: "key", Value: -1},
+				{Key: "workflow_id", Value: -1},
+			},
+			Options: options.Index().SetUnique(true),
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = db.Collection("workflow_action_deps").Indexes().CreateOne(ctx, mongo.IndexModel{
+			Keys: bson.D{
+				{Key: "key", Value: -1},
+				{Key: "meta_output", Value: -1},
+				{Key: "dep_key", Value: -1},
+				{Key: "workflow_id", Value: -1},
+			},
+			Options: options.Index().SetUnique(true),
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = db.Collection("workflow_session_contexts").Indexes().CreateOne(ctx, mongo.IndexModel{
+			Keys: bson.D{
+				{Key: "session_id", Value: -1},
+				{Key: "key", Value: -1},
+				{Key: "workflow_id", Value: -1},
+			},
+			Options: options.Index().SetUnique(true),
+		})
+
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	a := NewMongodDBWorkflowStorageAdapter(client, db)
 

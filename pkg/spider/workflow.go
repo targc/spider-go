@@ -36,7 +36,9 @@ func InitDefaultWorkflow(
 		return nil, err
 	}
 
-	storage, err := InitMongodDBWorkflowStorageAdapter(ctx)
+	storage, err := InitMongodDBWorkflowStorageAdapter(ctx, InitMongodDBWorkflowStorageAdapterOpt{
+		BetaAutoSetupSchema: true,
+	})
 
 	if err != nil {
 		return nil, err
