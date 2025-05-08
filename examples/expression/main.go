@@ -71,6 +71,12 @@ func main() {
 		"referred_username": "!get_referred_username(success_orders[0].User.ID)",
 		"user_devices":      "!ctx1.devices",
 		"output":            "!test.a1.output.value",
+		"cond":              "!test.a1.output.value == ctx1.id",
+		"cond2":              "!test.a1.output.value == 'll'",
+		"cond3":              "!test.a1.output.value == 'kk'",
+		"cond4":              "!test.a1.output.value == 'kk' || test.a1.output.value == 'll'",
+		"cond5":              "!test.a1.output.value == 'kk' && test.a1.output.value == 'll'",
+		"cond6":              "!(test.a1.output.value == 'kk' && test.a1.output.value == 'll') || 1 == 1 && 1 < 2",
 	}
 
 	output, err := ex(env, mapping)
