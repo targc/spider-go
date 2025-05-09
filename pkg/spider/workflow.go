@@ -97,7 +97,7 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 			return err
 		}
 
-		_ = workflowAction // TODO:
+		_ = workflowAction
 
 		wvalues := map[string]interface{}{}
 
@@ -141,14 +141,7 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 		for _, dep := range deps {
 			eg.Go(func() error {
 
-				mapper, err := w.storage.QueryWorkflowActionMapper(ctx, m.WorkflowID, m.Key, m.MetaOutput, dep.Key)
-
-				if err != nil {
-					slog.Error("QueryWorkflowActionMapper failed", slog.Any("error", err.Error()))
-					return err
-				}
-
-				nextInput, err := ex(wcontext, mapper)
+				nextInput, err := ex(wcontext, dep.Map)
 
 				if err != nil {
 					slog.Error("ex failed", slog.Any("error", err.Error()))
@@ -210,7 +203,7 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 			return err
 		}
 
-		_ = workflowAction // TODO:
+		_ = workflowAction
 
 		wvalues := map[string]interface{}{}
 
@@ -246,14 +239,7 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 		for _, dep := range deps {
 			eg.Go(func() error {
 
-				mapper, err := w.storage.QueryWorkflowActionMapper(ctx, m.WorkflowID, m.Key, m.MetaOutput, dep.Key)
-
-				if err != nil {
-					slog.Error("QueryWorkflowActionMapper failed", slog.Any("error", err.Error()))
-					return err
-				}
-
-				nextInput, err := ex(wcontext, mapper)
+				nextInput, err := ex(wcontext, dep.Map)
 
 				if err != nil {
 					slog.Error("ex failed", slog.Any("error", err.Error()))

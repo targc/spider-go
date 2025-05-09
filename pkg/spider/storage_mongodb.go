@@ -133,7 +133,7 @@ func NewMongodDBWorkflowStorageAdapter(client *mongo.Client, db *mongo.Database)
 	}
 }
 
-func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflowID, key, actionID string, config map[string]string) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflowID, key, actionID string, m map[string]Mapper) (*WorkflowAction, error) {
 
 	id, err := uuid.NewV7()
 
@@ -146,7 +146,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 		Key:        key,
 		WorkflowID: workflowID,
 		ActionID:   actionID,
-		Config:     config,
+		Map:        m,
 	}
 
 	_, err = w.workflowActionCollection.InsertOne(ctx, wa)
@@ -160,7 +160,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 		Key:        wa.Key,
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
-		Config:     wa.Config,
+		Map:        wa.Map,
 	}, nil
 }
 
@@ -170,7 +170,6 @@ func (w *MongodDBWorkflowStorageAdapter) AddDep(
 	key,
 	metaOutput,
 	depKey string,
-	m map[string]Mapper,
 ) error {
 	id, err := uuid.NewV7()
 
@@ -184,7 +183,6 @@ func (w *MongodDBWorkflowStorageAdapter) AddDep(
 		Key:        key,
 		MetaOutput: metaOutput,
 		DepKey:     depKey,
-		Map:        m,
 	}
 
 	_, err = w.workflowActionDepCollection.InsertOne(ctx, dep)
@@ -225,6 +223,7 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context
 		Key:        wa.Key,
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
+		Map:        wa.Map,
 	}, nil
 }
 
@@ -271,35 +270,6 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowActionDependencies(ctx con
 	}
 
 	return depActions, nil
-}
-
-func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowActionMapper(ctx context.Context, workflowID, key, metaOutput, depKey string) (map[string]Mapper, error) {
-
-	result := w.workflowActionDepCollection.FindOne(
-		ctx,
-		bson.D{
-			{Key: "workflow_id", Value: workflowID},
-			{Key: "key", Value: key},
-			{Key: "meta_output", Value: metaOutput},
-			{Key: "dep_key", Value: depKey},
-		},
-	)
-
-	err := result.Err()
-
-	if err != nil {
-		return nil, err
-	}
-
-	var dep MDWorkflowActionDep
-
-	err = result.Decode(&dep)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return dep.Map, nil
 }
 
 func (w *MongodDBWorkflowStorageAdapter) TryAddSessionContext(ctx context.Context, workflowID, sessionID, key string, value map[string]interface{}) (map[string]map[string]interface{}, error) {
@@ -383,16 +353,15 @@ type MDWorkflowAction struct {
 	Key        string            `bson:"key"`         // Composite unique index
 	WorkflowID string            `bson:"workflow_id"` // Composite unique index
 	ActionID   string            `bson:"action_id"`
-	Config     map[string]string `bson:"config"` // TODO: delete
+	Map        map[string]Mapper `bson:"map"`
 }
 
 type MDWorkflowActionDep struct {
-	ID         string            `bson:"_id"`
-	WorkflowID string            `bson:"workflow_id"` // Composite unique index
-	Key        string            `bson:"key"`         // Composite unique index
-	MetaOutput string            `bson:"meta_output"` // Composite unique index
-	DepKey     string            `bson:"dep_key"`     // Composite unique index
-	Map        map[string]Mapper `bson:"map"`
+	ID         string `bson:"_id"`
+	WorkflowID string `bson:"workflow_id"` // Composite unique index
+	Key        string `bson:"key"`         // Composite unique index
+	MetaOutput string `bson:"meta_output"` // Composite unique index
+	DepKey     string `bson:"dep_key"`     // Composite unique index
 }
 
 type MDWorkflowSessionContext struct {
