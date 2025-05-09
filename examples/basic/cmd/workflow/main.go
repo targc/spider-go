@@ -21,29 +21,56 @@ func main() {
 
 	workflowID := "wa"
 
-	_, err = storage.AddAction(ctx, workflowID, "a1", "test-action-a", nil)
+	_, err = storage.AddAction(
+		ctx,
+		workflowID,
+		"a1",
+		"test-action-a",
+		map[string]string{
+			"test": "a",
+		},
+		nil,
+	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = storage.AddAction(ctx, workflowID, "a2", "test-action-b", map[string]spider.Mapper{
-		"value": {
-			Mode:  spider.MapperModeExpression,
-			Value: "a1.output.value + '_updatedx1'",
+	_, err = storage.AddAction(
+		ctx,
+		workflowID,
+		"a2",
+		"test-action-b",
+		map[string]string{
+			"test": "b",
 		},
-	})
+		map[string]spider.Mapper{
+			"value": {
+				Mode:  spider.MapperModeExpression,
+				Value: "a1.output.value + '_updatedx1'",
+			},
+		},
+	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = storage.AddAction(ctx, workflowID, "a3", "test-action-b", map[string]spider.Mapper{
-		"value": {
-			Mode:  spider.MapperModeExpression,
-			Value: "a2.output.value + '_updatedx2'",
+	_, err = storage.AddAction(
+		ctx,
+		workflowID,
+		"a3",
+		"test-action-b",
+		map[string]string{
+			"test": "c",
 		},
-	})
+		map[string]spider.Mapper{
+			"value": {
+				Mode:  spider.MapperModeExpression,
+				Value: "a2.output.value + '_updatedx2'",
+			},
+		},
+	)
 
 	if err != nil {
 		panic(err)

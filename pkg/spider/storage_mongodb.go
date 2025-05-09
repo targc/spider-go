@@ -133,7 +133,7 @@ func NewMongodDBWorkflowStorageAdapter(client *mongo.Client, db *mongo.Database)
 	}
 }
 
-func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflowID, key, actionID string, m map[string]Mapper) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper) (*WorkflowAction, error) {
 
 	id, err := uuid.NewV7()
 
@@ -146,6 +146,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 		Key:        key,
 		WorkflowID: workflowID,
 		ActionID:   actionID,
+		Config:     conf,
 		Map:        m,
 	}
 
@@ -353,6 +354,7 @@ type MDWorkflowAction struct {
 	Key        string            `bson:"key"`         // Composite unique index
 	WorkflowID string            `bson:"workflow_id"` // Composite unique index
 	ActionID   string            `bson:"action_id"`
+	Config     map[string]string `bson:"config"`
 	Map        map[string]Mapper `bson:"map"`
 }
 

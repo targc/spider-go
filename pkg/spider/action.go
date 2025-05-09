@@ -5,5 +5,6 @@ type WorkflowAction struct {
 	Key        string
 	WorkflowID string
 	ActionID   string
+	Config     map[string]string
 	Map        map[string]Mapper
 }
