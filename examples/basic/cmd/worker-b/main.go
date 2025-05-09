@@ -1,25 +1,15 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
-	"os"
-	"os/signal"
 	"spider-go/pkg/spider"
 )
 
+const actionID = "test-action-b"
+
 func main() {
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	workerB, err := spider.InitDefaultWorker(ctx, "test-action-b")
-
-	if err != nil {
-		panic(err)
-	}
-
-	go workerB.Run(ctx, func(c spider.InputMessageContext, m spider.InputMessage) error {
+	err := spider.LazyBootstrapWorker(actionID, func(c spider.InputMessageContext, m spider.InputMessage) error {
 
 		slog.Info("[process] received input", slog.Any("message", m))
 
@@ -52,11 +42,7 @@ func main() {
 		return nil
 	})
 
-	nctx, ncancel := signal.NotifyContext(ctx, os.Interrupt)
-	defer ncancel()
-
-	<-nctx.Done()
-
-	cancel()
-	_ = workerB.Close(ctx)
+	if err != nil {
+		panic(err)
+	}
 }

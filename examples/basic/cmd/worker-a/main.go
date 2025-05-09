@@ -50,15 +50,16 @@ func main() {
 			return err
 		}
 
-		workerA.SendTriggerMessage(ctx, spider.TriggerMessage{
+		err = workerA.SendTriggerMessage(ctx, spider.TriggerMessage{
 			WorkflowID: payload.WorkflowID,
-			// TODO
-			// WorkflowActionID: payload.WorkflowActionID,
 			MetaOutput: "triggered",
 			Key:        payload.Key,
-			ActionID:   actionID,
 			Values:     string(outputb),
 		})
+
+		if err != nil {
+			return err
+		}
 
 		slog.Info("[process] sent")
 

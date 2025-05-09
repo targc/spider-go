@@ -54,6 +54,9 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 }
 
 func (w *Worker) SendTriggerMessage(ctx context.Context, m TriggerMessage) error {
+
+    m.ActionID = w.actionID
+
 	err := w.messenger.SendTriggerMessage(ctx, m)
 
 	if err != nil {
