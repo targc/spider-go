@@ -31,7 +31,7 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 		func(c InputMessageContext, m InputMessage) error {
 
 			c.SendOutput = func(metaOutput string, values string) error {
-				err := w.SendOutputMessage(c.Context, m.ToOutputMessage(metaOutput, values))
+				err := w.messenger.SendOutputMessage(c.Context, m.ToOutputMessage(metaOutput, values))
 
 				if err != nil {
 					return err
@@ -53,8 +53,8 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 	return err
 }
 
-func (w *Worker) SendOutputMessage(ctx context.Context, m OutputMessage) error {
-	err := w.messenger.SendOutputMessage(ctx, m)
+func (w *Worker) SendTriggerMessage(ctx context.Context, m TriggerMessage) error {
+	err := w.messenger.SendTriggerMessage(ctx, m)
 
 	if err != nil {
 		return err

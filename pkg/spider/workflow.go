@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	"github.com/expr-lang/expr"
+	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -59,6 +60,140 @@ func (w *Workflow) Storage() WorkflowStorageAdapter {
 }
 
 func (w *Workflow) Run(ctx context.Context) error {
+
+	eg := errgroup.Group{}
+
+	eg.Go(func() error {
+		return w.listenTriggerMessages(ctx)
+	})
+
+	eg.Go(func() error {
+		return w.listenOutputMessages(ctx)
+	})
+
+	err := eg.Wait()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
+
+	err := w.messenger.ListenTriggerMessages(ctx, func(c TriggerMessageContext, m TriggerMessage) error {
+
+		workflowAction, err := w.storage.QueryWorkflowAction(c.Context, m.WorkflowID, m.Key)
+
+		if err != nil {
+			slog.Error(
+				"QueryWorkflowAction failed",
+				slog.Any("error", err.Error()),
+				slog.Any("workflow_id", m.WorkflowID),
+				slog.Any("key", m.Key),
+			)
+
+			return err
+		}
+
+		_ = workflowAction // TODO:
+
+		wvalues := map[string]interface{}{}
+
+		err = json.Unmarshal([]byte(m.Values), &wvalues)
+
+		if err != nil {
+			slog.Error("unmarshal value failed", slog.Any("error", err.Error()))
+			return err
+		}
+
+		newContextVal := map[string]interface{}{
+			"output": wvalues,
+		}
+
+		sessionUUID, err := uuid.NewV7()
+
+		if err != nil {
+			return err
+		}
+
+		sessionID := sessionUUID.String()
+
+		wcontext, err := w.storage.TryAddSessionContext(ctx, m.WorkflowID, sessionID, m.Key, newContextVal)
+
+		if err != nil {
+			slog.Error("TryAddSessionContext failed", slog.Any("error", err.Error()))
+			return err
+		}
+
+		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowID, m.Key, m.MetaOutput)
+
+		if err != nil {
+			slog.Error("QueryWorkflowActionDependencies failed", slog.Any("error", err.Error()))
+			return err
+		}
+
+		eg := errgroup.Group{}
+
+		eg.SetLimit(10)
+
+		for _, dep := range deps {
+			eg.Go(func() error {
+
+				mapper, err := w.storage.QueryWorkflowActionMapper(ctx, m.WorkflowID, m.Key, m.MetaOutput, dep.Key)
+
+				if err != nil {
+					slog.Error("QueryWorkflowActionMapper failed", slog.Any("error", err.Error()))
+					return err
+				}
+
+				nextInput, err := ex(wcontext, mapper)
+
+				if err != nil {
+					slog.Error("ex failed", slog.Any("error", err.Error()))
+					return err
+				}
+
+				nextInputb, err := json.Marshal(nextInput)
+
+				if err != nil {
+					slog.Error("marshal next input failed", slog.Any("error", err.Error()))
+					return err
+				}
+
+				err = w.messenger.SendInputMessage(ctx, InputMessage{
+					SessionID:  sessionID,
+					WorkflowID: dep.WorkflowID,
+					// TODO
+					// WorkflowActionID: dep.ID,
+					Key:      dep.Key,
+					ActionID: dep.ActionID,
+					Values:   string(nextInputb),
+				})
+
+				if err != nil {
+					slog.Error("sent input message failed", slog.Any("error", err.Error()))
+					return err
+				}
+
+				return nil
+			})
+		}
+
+		err = eg.Wait()
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 
 	err := w.messenger.ListenOutputMessages(ctx, func(c OutputMessageContext, m OutputMessage) error {
 

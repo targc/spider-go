@@ -13,11 +13,13 @@ import (
 )
 
 type NATSWorkflowMessengerAdapter struct {
-	nc               *xnats.XNats
-	p                *xnats.Producer
-	c                *xnats.Consumer
-	cctx             jetstream.ConsumeContext
-	natsStreamPrefix string
+	nc                     *xnats.XNats
+	p                      *xnats.Producer
+	triggerMessageConsumer *xnats.Consumer
+	outputMessageConsumer  *xnats.Consumer
+	outputMessageCCtx      jetstream.ConsumeContext
+	triggerMessageCCtx     jetstream.ConsumeContext
+	natsStreamPrefix       string
 }
 
 var _ WorkflowMessengerAdapter = &NATSWorkflowMessengerAdapter{}
@@ -57,17 +59,25 @@ func InitNATSWorkflowMessengerAdapter(ctx context.Context, opt InitNATSWorkflowM
 
 	p := nc.Producer()
 
+	triggerStream := buildTriggerSubject(env.NATSStreamPrefix)
 	inputStream := buildInputSubject(env.NATSStreamPrefix)
 	outputStream := buildOutputSubject(env.NATSStreamPrefix)
-	consumerID := buildWorkflowConsumerID(env.NATSConsumerIDPrefix)
+	workflowActionTriggerConsumerID := buildWorkflowActionTriggerConsumerID(env.NATSConsumerIDPrefix)
+	workflowActionOutputConsumerID := buildWorkflowActionOutputConsumerID(env.NATSConsumerIDPrefix)
 
 	slog.Info(
 		"workflow",
 		slog.String("output_stream", outputStream),
-		slog.String("consumer_id", consumerID),
+		slog.String("consumer_id", workflowActionOutputConsumerID),
 	)
 
 	if opt.BetaAutoSetupNATS {
+
+		err = betaCreateJetstream(ctx, nc.JS(), triggerStream)
+
+		if err != nil {
+			return nil, err
+		}
 
 		err = betaCreateJetstream(ctx, nc.JS(), inputStream)
 
@@ -81,32 +91,45 @@ func InitNATSWorkflowMessengerAdapter(ctx context.Context, opt InitNATSWorkflowM
 			return nil, err
 		}
 
-		err = betaCreateConsumer(ctx, nc.JS(), outputStream, consumerID)
+		err = betaCreateConsumer(ctx, nc.JS(), triggerStream, workflowActionTriggerConsumerID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = betaCreateConsumer(ctx, nc.JS(), outputStream, workflowActionOutputConsumerID)
 
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	c, err := nc.Consumer(ctx, outputStream, consumerID)
+	triggerMessageConsumer, err := nc.Consumer(ctx, triggerStream, workflowActionTriggerConsumerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	outputMessageConsumer, err := nc.Consumer(ctx, outputStream, workflowActionOutputConsumerID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	adapter := NATSWorkflowMessengerAdapter{
-		nc:               nc,
-		p:                p,
-		c:                c,
-		natsStreamPrefix: env.NATSStreamPrefix,
+		nc:                     nc,
+		p:                      p,
+		triggerMessageConsumer: triggerMessageConsumer,
+		outputMessageConsumer:  outputMessageConsumer,
+		natsStreamPrefix:       env.NATSStreamPrefix,
 	}
 
 	return &adapter, nil
 }
 
-func (m *NATSWorkflowMessengerAdapter) ListenOutputMessages(ctx context.Context, h func(c OutputMessageContext, message OutputMessage) error) error {
+func (m *NATSWorkflowMessengerAdapter) ListenTriggerMessages(ctx context.Context, h func(c TriggerMessageContext, message TriggerMessage) error) error {
 
-	if m.cctx != nil {
+	if m.triggerMessageCCtx != nil {
 		return errors.New("cannot re-initialize")
 	}
 
@@ -116,7 +139,72 @@ func (m *NATSWorkflowMessengerAdapter) ListenOutputMessages(ctx context.Context,
 
 	eg.SetLimit(50)
 
-	cctx, err := m.c.Consume(func(msg jetstream.Msg) {
+	cctx, err := m.triggerMessageConsumer.Consume(func(msg jetstream.Msg) {
+		eg.Go(func() error {
+			msg.Ack()
+
+			slog.Info(
+				"received output",
+				slog.String("b", string(msg.Data())),
+			)
+
+			metadata, err := msg.Metadata()
+
+			if err != nil {
+				// TODO:
+				return err
+			}
+
+			var b NatsTriggerMessage
+
+			err = json.Unmarshal(msg.Data(), &b)
+
+			if err != nil {
+				// TODO:
+				return err
+			}
+
+			err = h(
+				TriggerMessageContext{
+					Context:   ictx,
+					Timestamp: metadata.Timestamp,
+				},
+				b.ToTriggerMessage(),
+			)
+
+			if err != nil {
+				// TODO:
+				return err
+			}
+
+			return nil
+		})
+	})
+
+	if err != nil {
+		return err
+	}
+
+	m.triggerMessageCCtx = cctx
+
+	<-ctx.Done()
+
+	return nil
+}
+
+func (m *NATSWorkflowMessengerAdapter) ListenOutputMessages(ctx context.Context, h func(c OutputMessageContext, message OutputMessage) error) error {
+
+	if m.outputMessageCCtx != nil {
+		return errors.New("cannot re-initialize")
+	}
+
+	ictx := context.Background()
+
+	eg := errgroup.Group{}
+
+	eg.SetLimit(50)
+
+	cctx, err := m.outputMessageConsumer.Consume(func(msg jetstream.Msg) {
 		eg.Go(func() error {
 			msg.Ack()
 
@@ -162,7 +250,7 @@ func (m *NATSWorkflowMessengerAdapter) ListenOutputMessages(ctx context.Context,
 		return err
 	}
 
-	m.cctx = cctx
+	m.outputMessageCCtx = cctx
 
 	<-ctx.Done()
 
@@ -202,7 +290,7 @@ func (m *NATSWorkflowMessengerAdapter) SendInputMessage(ctx context.Context, mes
 }
 
 func (m *NATSWorkflowMessengerAdapter) Close(ctx context.Context) error {
-	m.cctx.Stop()
+	m.outputMessageCCtx.Stop()
 	m.nc.Close()
 	return nil
 }

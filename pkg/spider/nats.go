@@ -3,10 +3,45 @@ package spider
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+type NatsTriggerMessage struct {
+	WorkflowID string `json:"workflow_id"`
+	// TODO
+	// WorkflowActionID string `json:"workflow_action_id"`
+	MetaOutput string `json:"meta_output"`
+	Key        string `json:"key"`
+	ActionID   string `json:"action_id"`
+	Values     string `json:"values"`
+}
+
+func (n NatsTriggerMessage) FromTriggerMessage(message TriggerMessage) NatsTriggerMessage {
+	return NatsTriggerMessage{
+		WorkflowID: message.WorkflowID,
+		// TODO:
+		// WorkflowActionID: message.WorkflowActionID,
+		MetaOutput: message.MetaOutput,
+		Key:        message.Key,
+		ActionID:   message.ActionID,
+		Values:     message.Values,
+	}
+}
+
+func (n *NatsTriggerMessage) ToTriggerMessage() TriggerMessage {
+	return TriggerMessage{
+		WorkflowID: n.WorkflowID,
+		// TODO
+		// WorkflowActionID: b.WorkflowActionID,
+		MetaOutput: n.MetaOutput,
+		Key:        n.Key,
+		ActionID:   n.ActionID,
+		Values:     n.Values,
+	}
+}
 
 type NatsOutputMessage struct {
 	SessionID  string `json:"session_id"`
@@ -67,6 +102,10 @@ func (n *NatsInputMessage) ToInputMessage() InputMessage {
 	}
 }
 
+func buildTriggerSubject(prefix string) string {
+	return fmt.Sprintf("%s-trigger", prefix)
+}
+
 func buildInputSubject(prefix string) string {
 	return fmt.Sprintf("%s-input", prefix)
 }
@@ -75,8 +114,12 @@ func buildOutputSubject(prefix string) string {
 	return fmt.Sprintf("%s-output", prefix)
 }
 
-func buildWorkflowConsumerID(prefix string) string {
-	return fmt.Sprintf("%s-workflow", prefix)
+func buildWorkflowActionTriggerConsumerID(prefix string) string {
+	return fmt.Sprintf("%s-workflow-action-trigger", prefix)
+}
+
+func buildWorkflowActionOutputConsumerID(prefix string) string {
+	return fmt.Sprintf("%s-workflow-action-output", prefix)
 }
 
 func buildWorkerConsumerID(prefix, actionID string) string {
@@ -127,6 +170,8 @@ func betaCreateJetstream(ctx context.Context, js jetstream.JetStream, stream str
 		return err
 	}
 
+	slog.Info("nats jetstream created", slog.String("stream", stream))
+
 	return nil
 }
 
@@ -168,6 +213,8 @@ func betaCreateConsumer(ctx context.Context, js jetstream.JetStream, stream, con
 	if err != nil {
 		return err
 	}
+
+	slog.Info("nats consumer created", slog.String("consumer_id", consumerID))
 
 	return nil
 }

@@ -3,12 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"spider-go/pkg/spider"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -52,8 +50,7 @@ func main() {
 			return err
 		}
 
-		workerA.SendOutputMessage(ctx, spider.OutputMessage{
-			SessionID:  fmt.Sprint(time.Now().Unix()),
+		workerA.SendTriggerMessage(ctx, spider.TriggerMessage{
 			WorkflowID: payload.WorkflowID,
 			// TODO
 			// WorkflowActionID: payload.WorkflowActionID,

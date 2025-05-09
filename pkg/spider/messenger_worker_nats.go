@@ -162,6 +162,30 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 	return nil
 }
 
+func (m *NATSWorkerMessengerAdapter) SendTriggerMessage(ctx context.Context, message TriggerMessage) error {
+	subject := buildTriggerSubject(m.natsStreamPrefix)
+
+	b, err := json.Marshal(NatsTriggerMessage{}.FromTriggerMessage(message))
+
+	if err != nil {
+		return err
+	}
+
+	slog.Info(
+		"sent trigger",
+		slog.String("subject", subject),
+		slog.String("b", string(b)),
+	)
+
+	err = m.p.Produce(ctx, subject, b)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *NATSWorkerMessengerAdapter) SendOutputMessage(ctx context.Context, message OutputMessage) error {
 	subject := buildOutputSubject(m.natsStreamPrefix)
 

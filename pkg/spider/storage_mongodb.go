@@ -383,7 +383,7 @@ type MDWorkflowAction struct {
 	Key        string            `bson:"key"`         // Composite unique index
 	WorkflowID string            `bson:"workflow_id"` // Composite unique index
 	ActionID   string            `bson:"action_id"`
-	Config     map[string]string `bson:"config"`
+	Config     map[string]string `bson:"config"` // TODO: delete
 }
 
 type MDWorkflowActionDep struct {

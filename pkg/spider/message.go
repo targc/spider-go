@@ -48,3 +48,18 @@ type OutputMessage struct {
 	MetaOutput string
 	Values     string
 }
+
+type TriggerMessageContext struct {
+	Context   context.Context
+	Timestamp time.Time
+}
+
+type TriggerMessage struct {
+	WorkflowID string
+	// TODO
+	// WorkflowActionID string
+	Key        string
+	ActionID   string
+	MetaOutput string
+	Values     string
+}
