@@ -52,8 +52,8 @@ services:
 
   example-basic-worker-a:
     container_name: example-basic-worker-a
-    # depends_on:
-    #   - nats-setup
+    depends_on:
+      - example-basic-workflow
     build:
       dockerfile: ./examples/basic/Dockerfile.base
       context: .
@@ -68,8 +68,8 @@ services:
   
   example-basic-worker-b:
     container_name: example-basic-worker-b
-    # depends_on:
-    #   - nats-setup
+    depends_on:
+      - example-basic-workflow
     build:
       dockerfile: ./examples/basic/Dockerfile.base
       context: .
@@ -78,4 +78,13 @@ services:
     working_dir: /opt/app
     command: /bin/sh -c 'go run examples/basic/cmd/worker-b/main.go'
     restart: always
-    environment: *common_env
+    environment: 
+      NATS_HOST: nats
+      NATS_PORT: 4222
+      NATS_USER: root
+      NATS_PASSWORD: root
+      NATS_STREAM_PREFIX: local
+      NATS_CONSUMER_ID_PREFIX: local
+      MONGODB_URI: mongodb://root:password@mongo:27017/
+      MONGODB_DB_NAME: wf
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}

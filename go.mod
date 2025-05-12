@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/nats-io/nats.go v1.41.1
 	github.com/sethvargo/go-envconfig v1.2.0
+	github.com/slack-go/slack v0.16.0
 	github.com/targc/xnats-go v1.0.1
 	go.mongodb.org/mongo-driver/v2 v2.2.0
 	golang.org/x/sync v0.13.0
@@ -16,6 +17,7 @@ require (
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

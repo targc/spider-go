@@ -11,13 +11,13 @@ func LazyBootstrapWorker(actionID string, h func(c InputMessageContext, m InputM
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	workerB, err := InitDefaultWorker(ctx, actionID)
+	worker, err := InitDefaultWorker(ctx, actionID)
 
 	if err != nil {
 		return err
 	}
 
-	go workerB.Run(ctx, h)
+	go worker.Run(ctx, h)
 
 	nctx, ncancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer ncancel()
@@ -26,7 +26,7 @@ func LazyBootstrapWorker(actionID string, h func(c InputMessageContext, m InputM
 
 	cancel()
 
-	_ = workerB.Close(ctx)
+	_ = worker.Close(ctx)
 
 	return nil
 }

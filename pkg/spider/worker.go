@@ -2,6 +2,7 @@ package spider
 
 import (
 	"context"
+	"log/slog"
 )
 
 type Worker struct {
@@ -43,6 +44,7 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 			err := h(c, m)
 
 			if err != nil {
+				slog.Error("failed to process handler", slog.String("error", err.Error()))
 				return err
 			}
 
@@ -55,7 +57,7 @@ func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputM
 
 func (w *Worker) SendTriggerMessage(ctx context.Context, m TriggerMessage) error {
 
-    m.ActionID = w.actionID
+	m.ActionID = w.actionID
 
 	err := w.messenger.SendTriggerMessage(ctx, m)
 
