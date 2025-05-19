@@ -1,0 +1,89 @@
+services:
+  nats:
+    container_name: nats
+    image: nats:2.11.1
+    ports:
+      - 4222:4222
+    command: --user root --pass root -js
+    restart: always
+
+  mongo:
+    container_name: mongo
+    image: mongo:8.0.9
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./.volumes/mongodb:/data/db
+
+  workflow:
+    container_name: workflow
+    build:
+      dockerfile: ./Dockerfile.dev
+      context: .
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go run cmd/workflow/main.go'
+    restart: always
+    environment: &common_env
+      NATS_HOST: nats
+      NATS_PORT: 4222
+      NATS_USER: root
+      NATS_PASSWORD: root
+      NATS_STREAM_PREFIX: local
+      NATS_CONSUMER_ID_PREFIX: local
+      MONGODB_URI: mongodb://root:password@mongo:27017/
+      MONGODB_DB_NAME: wf
+    ports:
+      - 8880:8080
+    healthcheck:
+       test: curl http://localhost:8080/healthz
+       interval: 60s
+       retries: 5
+       start_period: 20s
+       timeout: 10s
+
+  webhook-trigger:
+    container_name: webhook-trigger
+    depends_on:
+      - workflow
+    build:
+      dockerfile: ./Dockerfile.dev
+      context: .
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go run cmd/webhook-trigger/main.go'
+    restart: always
+    environment: *common_env
+    ports:
+      - 8881:8080
+  
+  slack-worker:
+    container_name: slack-worker
+    depends_on:
+      - workflow
+    build:
+      dockerfile: ./Dockerfile.dev
+      context: .
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go run cmd/slack-worker/main.go'
+    restart: always
+    environment: 
+      NATS_HOST: nats
+      NATS_PORT: 4222
+      NATS_USER: root
+      NATS_PASSWORD: root
+      NATS_STREAM_PREFIX: local
+      NATS_CONSUMER_ID_PREFIX: local
+      MONGODB_URI: mongodb://root:password@mongo:27017/
+      MONGODB_DB_NAME: wf
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+    healthcheck:
+       test: curl -f http://localhost:8080/healthz

@@ -11,8 +11,8 @@ var (
 )
 
 type Mapper struct {
-	Mode  MapperMode
-	Value string
+	Mode  MapperMode `json:"mode"`
+	Value string     `json:"value"`
 }
 
 type WorkflowStorageAdapter interface {

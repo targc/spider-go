@@ -117,7 +117,7 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 			metadata, err := msg.Metadata()
 
 			if err != nil {
-				// TODO:
+				slog.Error(err.Error())
 				return err
 			}
 
@@ -127,6 +127,7 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 
 			if err != nil {
 				// TODO:
+				slog.Error(err.Error())
 				return err
 			}
 
