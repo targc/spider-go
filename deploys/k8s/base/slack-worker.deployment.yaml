@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slack-worker
+  labels:
+    app: slack-worker
+spec:
+  selector:
+    matchLabels:
+      app: slack-worker
+  template:
+    metadata:
+      labels:
+        app: slack-worker
+    spec:
+      containers:
+      - name: slack-worker
+        image: workflow
+        command: [ "/bin/sh", "-c", "/opt/app/bin/slack-worker" ]

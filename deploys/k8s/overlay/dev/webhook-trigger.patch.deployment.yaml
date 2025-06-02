@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-trigger
+spec:
+  template:
+    spec:
+      containers:
+      - name: webhook-trigger
+        env:
+          - name: NATS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: workflow-nats
+                key: NATS_HOST
+          - name: NATS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: workflow-nats
+                key: NATS_PORT
+          - name: NATS_USER
+            valueFrom:
+              configMapKeyRef:
+                name: workflow-nats
+                key: NATS_USER
+          - name: NATS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: workflow-nats
+                key: NATS_PASSWORD
+          - name: NATS_STREAM_PREFIX
+            valueFrom:
+              configMapKeyRef:
+                name: workflow-nats
+                key: NATS_STREAM_PREFIX
+          - name: NATS_CONSUMER_ID_PREFIX
+            valueFrom:
+              configMapKeyRef:
+                name: workflow-nats
+                key: NATS_CONSUMER_ID_PREFIX
+          - name: MONGODB_URI
+            valueFrom:
+              secretKeyRef:
+                name: workflow-mongodb
+                key: MONGODB_URI
+          - name: MONGODB_DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: workflow-mongodb
+                key: MONGODB_DB_NAME

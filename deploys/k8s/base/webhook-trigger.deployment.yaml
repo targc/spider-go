@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-trigger
+  labels:
+    app: webhook-trigger
+spec:
+  selector:
+    matchLabels:
+      app: webhook-trigger
+  template:
+    metadata:
+      labels:
+        app: webhook-trigger
+    spec:
+      containers:
+      - name: webhook-trigger
+        image: workflow
+        command: [ "/bin/sh", "-c", "/opt/app/bin/webhook-trigger" ]

@@ -1,0 +1,6 @@
+Dockerfile*
+docker-compose*
+.gitignore
+tmp/
+deploys/k8s
+.volumes/

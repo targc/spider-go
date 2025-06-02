@@ -1,2 +1,4 @@
 .volumes/
 tmp/
+
+deploys/k8s/private/

@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  NATS_HOST: 54.179.170.117 
+  NATS_PORT: "4222"
+  NATS_USER: root
+  NATS_STREAM_PREFIX: dev
+  NATS_CONSUMER_ID_PREFIX: dev
+kind: ConfigMap
+metadata:
+  name: workflow-nats
