@@ -1,4 +1,4 @@
-module spider-go
+module github.com/targc/spider-go
 
 go 1.24.0
 

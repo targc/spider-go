@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"spider-go/pkg/spider"
+	"github.com/targc/spider-go/pkg/spider"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"

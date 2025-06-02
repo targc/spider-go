@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
-	"spider-go/pkg/spider"
+	"github.com/targc/spider-go/pkg/spider"
 
 	"github.com/sethvargo/go-envconfig"
 	"github.com/slack-go/slack"
