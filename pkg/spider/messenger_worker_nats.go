@@ -72,7 +72,7 @@ func InitNATSWorkerMessengerAdapter(ctx context.Context, actionID string, opt In
 		err = betaCreateConsumer(ctx, nc.JS(), inputStream, consumerID)
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 	}
 
