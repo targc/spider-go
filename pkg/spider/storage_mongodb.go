@@ -57,25 +57,25 @@ func InitMongodDBWorkflowStorageAdapter(ctx context.Context, opt InitMongodDBWor
 		err = db.CreateCollection(ctx, "workflows")
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 
 		err = db.CreateCollection(ctx, "workflow_actions")
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 
 		err = db.CreateCollection(ctx, "workflow_action_deps")
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 
 		err = db.CreateCollection(ctx, "workflow_session_contexts")
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 
 		_, err = db.Collection("workflow_actions").Indexes().CreateOne(ctx, mongo.IndexModel{
@@ -87,7 +87,7 @@ func InitMongodDBWorkflowStorageAdapter(ctx context.Context, opt InitMongodDBWor
 		})
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 
 		_, err = db.Collection("workflow_action_deps").Indexes().CreateOne(ctx, mongo.IndexModel{
@@ -101,7 +101,7 @@ func InitMongodDBWorkflowStorageAdapter(ctx context.Context, opt InitMongodDBWor
 		})
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 
 		_, err = db.Collection("workflow_session_contexts").Indexes().CreateOne(ctx, mongo.IndexModel{
@@ -114,7 +114,7 @@ func InitMongodDBWorkflowStorageAdapter(ctx context.Context, opt InitMongodDBWor
 		})
 
 		if err != nil {
-			return nil, err
+			// return nil, err
 		}
 	}
 
