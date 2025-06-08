@@ -87,3 +87,27 @@ services:
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
     healthcheck:
        test: curl -f http://localhost:8080/healthz
+
+  fd-order-worker:
+    container_name: fd-order-worker
+    depends_on:
+      - workflow
+    build:
+      dockerfile: ./Dockerfile.dev
+      context: .
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go run cmd/fd-order-worker/main.go'
+    restart: always
+    environment: 
+      NATS_HOST: nats
+      NATS_PORT: 4222
+      NATS_USER: root
+      NATS_PASSWORD: root
+      NATS_STREAM_PREFIX: local
+      NATS_CONSUMER_ID_PREFIX: local
+      MONGODB_URI: mongodb://root:password@mongo:27017/
+      MONGODB_DB_NAME: wf
+    healthcheck:
+       test: curl -f http://localhost:8080/healthz

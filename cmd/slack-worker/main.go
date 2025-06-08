@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 
 	"github.com/targc/spider-go/pkg/spider"
@@ -44,45 +43,42 @@ func main() {
 			return err
 		}
 
-		for i := range 3 {
+		text := input.Value
 
-			text := input.Value + "@" + fmt.Sprint(i+1)
-
-			attachment := slack.Attachment{
-				Text: text,
-			}
-
-			msg := slack.WebhookMessage{
-				Attachments: []slack.Attachment{attachment},
-			}
-
-			err = slack.PostWebhookContext(c.Context, conf.SlackWebhookURL, &msg)
-
-			if err != nil {
-				slog.Error(err.Error())
-				return err
-			}
-
-			output := map[string]interface{}{
-				"value": text,
-			}
-
-			outputb, err := json.Marshal(output)
-
-			if err != nil {
-				slog.Error(err.Error())
-				return err
-			}
-
-			err = c.SendOutput("success", string(outputb))
-
-			if err != nil {
-				slog.Error(err.Error())
-				return err
-			}
-
-			slog.Info("[process] sent output", slog.Any("message", string(outputb)))
+		attachment := slack.Attachment{
+			Text: text,
 		}
+
+		msg := slack.WebhookMessage{
+			Attachments: []slack.Attachment{attachment},
+		}
+
+		err = slack.PostWebhookContext(c.Context, conf.SlackWebhookURL, &msg)
+
+		if err != nil {
+			slog.Error(err.Error())
+			return err
+		}
+
+		output := map[string]interface{}{
+			"value": text,
+		}
+
+		outputb, err := json.Marshal(output)
+
+		if err != nil {
+			slog.Error(err.Error())
+			return err
+		}
+
+		err = c.SendOutput("success", string(outputb))
+
+		if err != nil {
+			slog.Error(err.Error())
+			return err
+		}
+
+		slog.Info("[process] sent output", slog.Any("message", string(outputb)))
 
 		return nil
 	})
