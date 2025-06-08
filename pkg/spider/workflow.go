@@ -336,6 +336,9 @@ func (w *Workflow) Close(ctx context.Context) error {
 }
 
 func ex(env map[string]map[string]interface{}, mapping map[string]Mapper) (map[string]interface{}, error) {
+
+	env["builtin"]["string"] = func(value any) string { return fmt.Sprint(value) }
+
 	output := map[string]interface{}{}
 
 	for k, v := range mapping {
