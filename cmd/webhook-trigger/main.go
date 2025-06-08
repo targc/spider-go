@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/targc/spider-go/pkg/spider"
 	"log/slog"
 	"os"
 	"os/signal"
-	"github.com/targc/spider-go/pkg/spider"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -32,9 +32,9 @@ func main() {
 	app.Post("/trigger", func(c *fiber.Ctx) error {
 
 		var payload struct {
-			WorkflowID       string `json:"workflow_id"`
-			Key              string `json:"key"`
-			Value            string `json:"value"`
+			WorkflowID string      `json:"workflow_id"`
+			Key        string      `json:"key"`
+			Value      interface{} `json:"value"`
 		}
 
 		err = c.BodyParser(&payload)

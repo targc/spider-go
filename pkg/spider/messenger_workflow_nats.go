@@ -262,6 +262,7 @@ func (m *NATSWorkflowMessengerAdapter) SendInputMessage(ctx context.Context, mes
 
 	b, err := json.Marshal(NatsInputMessage{
 		SessionID:  message.SessionID,
+		TaskID:     message.TaskID,
 		WorkflowID: message.WorkflowID,
 		// TODO
 		// WorkflowActionID: message.WorkflowActionID,

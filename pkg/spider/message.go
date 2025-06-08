@@ -13,6 +13,7 @@ type InputMessageContext struct {
 
 type InputMessage struct {
 	SessionID  string
+	TaskID     string
 	WorkflowID string
 	// TODO
 	// WorkflowActionID string
@@ -24,6 +25,7 @@ type InputMessage struct {
 func (m *InputMessage) ToOutputMessage(metaOutput, values string) OutputMessage {
 	return OutputMessage{
 		SessionID:  m.SessionID,
+		TaskID:     m.TaskID,
 		WorkflowID: m.WorkflowID,
 		// TODO
 		// WorkflowActionID: m.WorkflowActionID,
@@ -40,6 +42,7 @@ type OutputMessageContext struct {
 
 type OutputMessage struct {
 	SessionID  string
+	TaskID     string
 	WorkflowID string
 	// TODO
 	// WorkflowActionID string

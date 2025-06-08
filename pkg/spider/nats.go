@@ -45,6 +45,7 @@ func (n *NatsTriggerMessage) ToTriggerMessage() TriggerMessage {
 
 type NatsOutputMessage struct {
 	SessionID  string `json:"session_id"`
+	TaskID     string `json:"task_id"`
 	WorkflowID string `json:"workflow_id"`
 	// TODO
 	// WorkflowActionID string `json:"workflow_action_id"`
@@ -57,6 +58,7 @@ type NatsOutputMessage struct {
 func (n NatsOutputMessage) FromOutputMessage(message OutputMessage) NatsOutputMessage {
 	return NatsOutputMessage{
 		SessionID:  message.SessionID,
+		TaskID:     message.TaskID,
 		WorkflowID: message.WorkflowID,
 		// TODO:
 		// WorkflowActionID: message.WorkflowActionID,
@@ -70,6 +72,7 @@ func (n NatsOutputMessage) FromOutputMessage(message OutputMessage) NatsOutputMe
 func (n *NatsOutputMessage) ToOutputMessage() OutputMessage {
 	return OutputMessage{
 		SessionID:  n.SessionID,
+		TaskID:     n.TaskID,
 		WorkflowID: n.WorkflowID,
 		// TODO
 		// WorkflowActionID: b.WorkflowActionID,
@@ -82,6 +85,7 @@ func (n *NatsOutputMessage) ToOutputMessage() OutputMessage {
 
 type NatsInputMessage struct {
 	SessionID  string `json:"session_id"`
+	TaskID     string `json:"task_id"`
 	WorkflowID string `json:"workflow_id"`
 	// TODO
 	// WorkflowActionID string `json:"workflow_action_id"`
@@ -93,6 +97,7 @@ type NatsInputMessage struct {
 func (n *NatsInputMessage) ToInputMessage() InputMessage {
 	return InputMessage{
 		SessionID:  n.SessionID,
+		TaskID:     n.TaskID,
 		WorkflowID: n.WorkflowID,
 		// TODO
 		// WorkflowActionID: n.WorkflowActionID,

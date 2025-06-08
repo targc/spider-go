@@ -108,10 +108,6 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 			return err
 		}
 
-		newContextVal := map[string]interface{}{
-			"output": wvalues,
-		}
-
 		sessionUUID, err := uuid.NewV7()
 
 		if err != nil {
@@ -120,11 +116,9 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 
 		sessionID := sessionUUID.String()
 
-		wcontext, err := w.storage.TryAddSessionContext(ctx, m.WorkflowID, sessionID, m.Key, newContextVal)
-
-		if err != nil {
-			slog.Error("TryAddSessionContext failed", slog.Any("error", err.Error()))
-			return err
+		nextContextVal := map[string]map[string]interface{}{}
+		nextContextVal[m.Key] = map[string]interface{}{
+			"output": wvalues,
 		}
 
 		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowID, m.Key, m.MetaOutput)
@@ -141,10 +135,25 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 		for _, dep := range deps {
 			eg.Go(func() error {
 
-				nextInput, err := ex(wcontext, dep.Map)
+				nextTaskUUID, err := uuid.NewV7()
 
 				if err != nil {
-					slog.Error("ex failed", slog.Any("error", err.Error()))
+					return err
+				}
+
+				nextTaskID := nextTaskUUID.String()
+
+				err = w.storage.CreateSessionContext(ctx, m.WorkflowID, sessionID, nextTaskID, nextContextVal)
+
+				if err != nil {
+					slog.Error("CreateSessionContext failed", slog.Any("error", err.Error()))
+					return err
+				}
+
+				nextInput, err := ex(nextContextVal, dep.Map)
+
+				if err != nil {
+					slog.Error("marshal next input failed", slog.Any("error", err.Error()))
 					return err
 				}
 
@@ -157,6 +166,7 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 
 				err = w.messenger.SendInputMessage(ctx, InputMessage{
 					SessionID:  sessionID,
+					TaskID:     nextTaskID,
 					WorkflowID: dep.WorkflowID,
 					// TODO
 					// WorkflowActionID: dep.ID,
@@ -214,21 +224,29 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 			return err
 		}
 
-		newContextVal := map[string]interface{}{
-			"output": wvalues,
-		}
-
-		wcontext, err := w.storage.TryAddSessionContext(ctx, m.WorkflowID, m.SessionID, m.Key, newContextVal)
+		wcontext, err := w.storage.GetSessionContext(ctx, m.WorkflowID, m.SessionID, m.TaskID)
 
 		if err != nil {
-			slog.Error("TryAddSessionContext failed", slog.Any("error", err.Error()))
+			slog.Error("GetSessionContext failed", slog.Any("error", err.Error()))
 			return err
+		}
+
+		nextContextVal := wcontext
+		nextContextVal[m.Key] = map[string]interface{}{
+			"output": wvalues,
 		}
 
 		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowID, m.Key, m.MetaOutput)
 
 		if err != nil {
 			slog.Error("QueryWorkflowActionDependencies failed", slog.Any("error", err.Error()))
+			return err
+		}
+
+		err = w.storage.DeleteSessionContext(ctx, m.WorkflowID, m.SessionID, m.TaskID)
+
+		if err != nil {
+			slog.Error("DeleteSessionContext failed", slog.Any("error", err.Error()))
 			return err
 		}
 
@@ -239,7 +257,22 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 		for _, dep := range deps {
 			eg.Go(func() error {
 
-				nextInput, err := ex(wcontext, dep.Map)
+				nextTaskUUID, err := uuid.NewV7()
+
+				if err != nil {
+					return err
+				}
+
+				nextTaskID := nextTaskUUID.String()
+
+				err = w.storage.CreateSessionContext(ctx, m.WorkflowID, m.SessionID, nextTaskID, nextContextVal)
+
+				if err != nil {
+					slog.Error("CreateSessionContext failed", slog.Any("error", err.Error()))
+					return err
+				}
+
+				nextInput, err := ex(nextContextVal, dep.Map)
 
 				if err != nil {
 					slog.Error("ex failed", slog.Any("error", err.Error()))
@@ -255,6 +288,7 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 
 				err = w.messenger.SendInputMessage(ctx, InputMessage{
 					SessionID:  m.SessionID,
+					TaskID:     nextTaskID,
 					WorkflowID: dep.WorkflowID,
 					// TODO
 					// WorkflowActionID: dep.ID,
