@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"github.com/targc/spider-go/pkg/spider"
 	"os"
 	"os/signal"
-	"github.com/targc/spider-go/pkg/spider"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -13,6 +13,7 @@ import (
 type WorkflowAction struct {
 	Key      string                   `json:"key"`
 	ActionID string                   `json:"action_id"`
+	Config   map[string]string        `json:"config"`
 	Mapper   map[string]spider.Mapper `json:"mapper"`
 }
 
@@ -71,7 +72,7 @@ func main() {
 				workflowID,
 				action.Key,
 				action.ActionID,
-				nil,
+				action.Config,
 				action.Mapper,
 			)
 
