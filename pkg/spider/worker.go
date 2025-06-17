@@ -7,6 +7,7 @@ import (
 
 type Worker struct {
 	messenger WorkerMessengerAdapter
+	storage   WorkerStorageAdapter
 	actionID  string
 }
 
@@ -22,7 +23,17 @@ func InitDefaultWorker(
 		return nil, err
 	}
 
-	return &Worker{messenger, actionID}, nil
+	storage, err := InitMongodDBWorkerStorageAdapter(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Worker{
+		messenger,
+		storage,
+		actionID,
+	}, nil
 }
 
 func (w *Worker) Run(ctx context.Context, h func(c InputMessageContext, m InputMessage) error) error {
@@ -66,6 +77,17 @@ func (w *Worker) SendTriggerMessage(ctx context.Context, m TriggerMessage) error
 	}
 
 	return nil
+}
+
+func (w *Worker) GetAllConfigs(ctx context.Context) ([]WorkerConfig, error) {
+
+	confs, err := w.storage.GetAllConfigs(ctx, w.actionID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return confs, nil
 }
 
 func (w *Worker) Close(ctx context.Context) error {

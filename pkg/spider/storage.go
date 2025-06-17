@@ -25,3 +25,15 @@ type WorkflowStorageAdapter interface {
 	DeleteSessionContext(ctx context.Context, workflowID, sessionID, taskID string) error
 	Close(ctx context.Context) error
 }
+
+type WorkerConfig struct {
+	WorkflowActionID string
+	WorkflowID       string
+	Key              string
+	Config           map[string]string
+}
+
+type WorkerStorageAdapter interface {
+	GetAllConfigs(ctx context.Context, actionID string) ([]WorkerConfig, error)
+	Close(ctx context.Context) error
+}
