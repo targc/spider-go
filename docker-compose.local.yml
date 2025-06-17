@@ -22,7 +22,7 @@ services:
   workflow:
     container_name: workflow
     build:
-      dockerfile: ./Dockerfile.dev
+      dockerfile: ./Dockerfile.local
       context: .
     volumes:
       - .:/opt/app
@@ -52,7 +52,7 @@ services:
     depends_on:
       - workflow
     build:
-      dockerfile: ./Dockerfile.dev
+      dockerfile: ./Dockerfile.local
       context: .
     volumes:
       - .:/opt/app
@@ -68,7 +68,7 @@ services:
     depends_on:
       - workflow
     build:
-      dockerfile: ./Dockerfile.dev
+      dockerfile: ./Dockerfile.local
       context: .
     volumes:
       - .:/opt/app
@@ -93,7 +93,7 @@ services:
     depends_on:
       - workflow
     build:
-      dockerfile: ./Dockerfile.dev
+      dockerfile: ./Dockerfile.local
       context: .
     volumes:
       - .:/opt/app
