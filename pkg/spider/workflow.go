@@ -116,7 +116,7 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 
 		sessionID := sessionUUID.String()
 
-		nextContextVal := map[string]map[string]interface{}{}
+		nextContextVal := map[string]interface{}{}
 		nextContextVal[m.Key] = map[string]interface{}{
 			"output": wvalues,
 		}
@@ -335,10 +335,10 @@ func (w *Workflow) Close(ctx context.Context) error {
 	return nil
 }
 
-func ex(env map[string]map[string]interface{}, mapping map[string]Mapper) (map[string]interface{}, error) {
+func ex(env map[string]interface{}, mapping map[string]Mapper) (map[string]interface{}, error) {
 
 	if env == nil {
-		env = map[string]map[string]interface{}{}
+		env = map[string]interface{}{}
 	}
 
 	env["builtin"] = map[string]interface{}{

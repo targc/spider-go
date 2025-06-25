@@ -272,7 +272,7 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowActionDependencies(ctx con
 	return depActions, nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) GetSessionContext(ctx context.Context, workflowID, sessionID, taskID string) (map[string]map[string]interface{}, error) {
+func (w *MongodDBWorkflowStorageAdapter) GetSessionContext(ctx context.Context, workflowID, sessionID, taskID string) (map[string]interface{}, error) {
 	result := w.workflowSessionContextCollection.FindOne(
 		ctx,
 		bson.D{
@@ -299,7 +299,7 @@ func (w *MongodDBWorkflowStorageAdapter) GetSessionContext(ctx context.Context, 
 	return sessCtx.Value, nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) CreateSessionContext(ctx context.Context, workflowID, sessionID, taskID string, value map[string]map[string]interface{}) error {
+func (w *MongodDBWorkflowStorageAdapter) CreateSessionContext(ctx context.Context, workflowID, sessionID, taskID string, value map[string]interface{}) error {
 	id, err := uuid.NewV7()
 
 	if err != nil {
@@ -362,9 +362,9 @@ type MDWorkflowActionDep struct {
 }
 
 type MDWorkflowSessionContext struct {
-	ID         string                            `bson:"_id"`
-	WorkflowID string                            `bson:"workflow_id"` // Composite unique index
-	SessionID  string                            `bson:"session_id"`  // Composite unique index
-	TaskID     string                            `bson:"task_id"`     // Composite unique index
-	Value      map[string]map[string]interface{} `bson:"value"`
+	ID         string                 `bson:"_id"`
+	WorkflowID string                 `bson:"workflow_id"` // Composite unique index
+	SessionID  string                 `bson:"session_id"`  // Composite unique index
+	TaskID     string                 `bson:"task_id"`     // Composite unique index
+	Value      map[string]interface{} `bson:"value"`
 }
