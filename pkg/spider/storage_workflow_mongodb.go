@@ -362,9 +362,9 @@ type MDWorkflowActionDep struct {
 }
 
 type MDWorkflowSessionContext struct {
-	ID         string                 `bson:"_id"`
-	WorkflowID string                 `bson:"workflow_id"` // Composite unique index
-	SessionID  string                 `bson:"session_id"`  // Composite unique index
-	TaskID     string                 `bson:"task_id"`     // Composite unique index
-	Value      map[string]interface{} `bson:"value"`
+	ID         string `bson:"_id"`
+	WorkflowID string `bson:"workflow_id"` // Composite unique index
+	SessionID  string `bson:"session_id"`  // Composite unique index
+	TaskID     string `bson:"task_id"`     // Composite unique index
+	Value      bson.M `bson:"value"`
 }
