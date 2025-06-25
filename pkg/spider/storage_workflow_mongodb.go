@@ -2,6 +2,7 @@ package spider
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/google/uuid"
 	"github.com/sethvargo/go-envconfig"
@@ -291,6 +292,18 @@ func (w *MongodDBWorkflowStorageAdapter) GetSessionContext(ctx context.Context, 
 	var sessCtx MDWorkflowSessionContext
 
 	err = result.Decode(&sessCtx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	valb, err := json.Marshal(sessCtx.Value)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(valb, &sessCtx.Value)
 
 	if err != nil {
 		return nil, err
