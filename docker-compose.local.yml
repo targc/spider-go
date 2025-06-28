@@ -135,3 +135,27 @@ services:
       MONGODB_DB_NAME: wf
     healthcheck:
        test: curl -f http://localhost:8080/healthz
+
+  control-flow-worker:
+    container_name: control-flow-worker
+    depends_on:
+      - workflow
+    build:
+      dockerfile: ./Dockerfile.local
+      context: .
+    volumes:
+      - .:/opt/app
+    working_dir: /opt/app
+    command: /bin/sh -c 'go run cmd/control-flow-worker/main.go'
+    restart: always
+    environment: 
+      NATS_HOST: nats
+      NATS_PORT: 4222
+      NATS_USER: root
+      NATS_PASSWORD: root
+      NATS_STREAM_PREFIX: local
+      NATS_CONSUMER_ID_PREFIX: local
+      MONGODB_URI: mongodb://root:password@mongo:27017/
+      MONGODB_DB_NAME: wf
+    healthcheck:
+       test: curl -f http://localhost:8080/healthz
