@@ -7,4 +7,5 @@ type WorkflowAction struct {
 	ActionID   string
 	Config     map[string]string
 	Map        map[string]Mapper
+	Disabled   bool
 }

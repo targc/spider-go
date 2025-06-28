@@ -97,7 +97,9 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 			return err
 		}
 
-		_ = workflowAction
+		if workflowAction.Disabled {
+			return nil
+		}
 
 		wvalues := map[string]interface{}{}
 
@@ -213,7 +215,9 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 			return err
 		}
 
-		_ = workflowAction
+		if workflowAction.Disabled {
+			return nil
+		}
 
 		wvalues := map[string]interface{}{}
 

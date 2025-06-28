@@ -148,6 +148,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 		ActionID:   actionID,
 		Config:     conf,
 		Map:        m,
+		Disabled:   false,
 	}
 
 	_, err = w.workflowActionCollection.InsertOne(ctx, wa)
@@ -162,6 +163,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
 		Map:        wa.Map,
+		Disabled:   wa.Disabled,
 	}, nil
 }
 
@@ -225,6 +227,7 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
 		Map:        wa.Map,
+		Disabled:   wa.Disabled,
 	}, nil
 }
 
@@ -353,6 +356,31 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteSessionContext(ctx context.Contex
 	return nil
 }
 
+func (w *MongodDBWorkflowStorageAdapter) DisableWorkflowAction(ctx context.Context, workflowID, key string) error {
+
+	_, err := w.workflowActionCollection.UpdateOne(
+		ctx,
+		bson.D{
+			{Key: "workflow_id", Value: workflowID},
+			{Key: "key", Value: key},
+		},
+		bson.D{
+			{
+				Key: "$set",
+				Value: bson.D{
+					{Key: "disabled", Value: true},
+				},
+			},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 	return w.client.Disconnect(ctx)
 }
@@ -364,6 +392,7 @@ type MDWorkflowAction struct {
 	ActionID   string            `bson:"action_id"`
 	Config     map[string]string `bson:"config"`
 	Map        map[string]Mapper `bson:"map"`
+	Disabled   bool              `bson:"disabled"`
 }
 
 type MDWorkflowActionDep struct {

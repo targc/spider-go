@@ -23,6 +23,7 @@ type WorkflowStorageAdapter interface {
 	GetSessionContext(ctx context.Context, workflowID, sessionID, taskID string) (map[string]map[string]interface{}, error)
 	CreateSessionContext(ctx context.Context, workflowID, sessionID, taskID string, value map[string]map[string]interface{}) error
 	DeleteSessionContext(ctx context.Context, workflowID, sessionID, taskID string) error
+	DisableWorkflowAction(ctx context.Context, workflowID, key string) error
 	Close(ctx context.Context) error
 }
 

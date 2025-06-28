@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/targc/spider-go/pkg/spider"
+	"log/slog"
 	"os"
 	"os/signal"
+
+	"github.com/targc/spider-go/pkg/spider"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -98,6 +100,30 @@ func main() {
 		return c.JSON(map[string]interface{}{
 			"workflow_id": workflowID,
 		})
+	})
+
+	app.Post("/workflow-action-disable", func(c *fiber.Ctx) error {
+
+		var payload struct {
+			WorkflowID string `json:"workflow_id"`
+			Key        string `json:"key"`
+		}
+
+		err = c.BodyParser(&payload)
+
+		if err != nil {
+			return err
+		}
+
+		err = storage.DisableWorkflowAction(ctx, payload.WorkflowID, payload.Key)
+
+		if err != nil {
+			return err
+		}
+
+		slog.Info("[process] disabled")
+
+		return nil
 	})
 
 	go worflow.Run(ctx)
