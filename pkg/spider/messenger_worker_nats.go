@@ -9,7 +9,6 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sethvargo/go-envconfig"
 	"github.com/targc/xnats-go"
-	"golang.org/x/sync/errgroup"
 )
 
 type NATSWorkerMessengerAdapter struct {
@@ -101,18 +100,21 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 
 	ictx := context.Background()
 
-	eg := errgroup.Group{}
-
-	eg.SetLimit(50)
+	sem := make(chan struct{}, 10)
 
 	cctx, err := m.c.Consume(func(msg jetstream.Msg) {
-		eg.Go(func() error {
-			err := msg.Ack()
+		sem <- struct{}{}
+
+		msg.Ack()
+
+		go func() error {
+			defer func() {
+				<-sem
+			}()
 
 			slog.Info(
 				"received input",
 				slog.String("b", string(msg.Data())),
-				slog.Any("err", err),
 			)
 
 			metadata, err := msg.Metadata()
@@ -150,7 +152,7 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 			}
 
 			return nil
-		})
+		}()
 	})
 
 	if err != nil {
