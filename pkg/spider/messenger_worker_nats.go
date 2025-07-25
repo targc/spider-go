@@ -107,11 +107,12 @@ func (m *NATSWorkerMessengerAdapter) ListenInputMessages(ctx context.Context, h 
 
 	cctx, err := m.c.Consume(func(msg jetstream.Msg) {
 		eg.Go(func() error {
-			msg.Ack()
+			err := msg.Ack()
 
 			slog.Info(
 				"received input",
 				slog.String("b", string(msg.Data())),
+				slog.Any("err", err),
 			)
 
 			metadata, err := msg.Metadata()

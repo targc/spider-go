@@ -119,9 +119,12 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 		sessionID := sessionUUID.String()
 
 		nextContextVal := map[string]map[string]interface{}{}
+
 		nextContextVal[m.Key] = map[string]interface{}{
 			"output": wvalues,
 		}
+
+		nextContextVal["$trigger"] = nextContextVal[m.Key]
 
 		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowID, m.Key, m.MetaOutput)
 
