@@ -2,22 +2,22 @@ package main
 
 import (
 	"context"
+	"github.com/targc/spider-go/pkg/spider"
 	"os"
 	"os/signal"
-	"github.com/targc/spider-go/pkg/spider"
 )
 
 func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	worflow, err := spider.InitDefaultWorkflow(ctx)
+	workflow, err := spider.InitDefaultWorkflow(ctx)
 
 	if err != nil {
 		panic(err)
 	}
 
-	storage := worflow.Storage()
+	storage := workflow.Storage()
 
 	workflowID := "wa"
 
@@ -88,7 +88,7 @@ func main() {
 		panic(err)
 	}
 
-	go worflow.Run(ctx)
+	go workflow.Run(ctx)
 
 	nctx, ncancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer ncancel()
@@ -96,5 +96,5 @@ func main() {
 	<-nctx.Done()
 
 	cancel()
-	_ = worflow.Close(ctx)
+	_ = workflow.Close(ctx)
 }
