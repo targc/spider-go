@@ -6,6 +6,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// CreateFlow godoc
+// @Summary Create a new flow
+// @Description Create a new workflow flow for a tenant
+// @Tags flows
+// @Accept json
+// @Produce json
+// @Param tenant_id path string true "Tenant ID"
+// @Param payload body object true "Flow creation payload"
+// @Success 200 {object} usecase.FlowResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /tenants/{tenant_id}/flows [post]
 func (h *Handler) CreateFlow(c *fiber.Ctx) error {
 	tenantID := c.Params("tenant_id")
 	if tenantID == "" {
@@ -73,6 +85,18 @@ func (h *Handler) CreateFlow(c *fiber.Ctx) error {
 	return c.JSON(result)
 }
 
+// ListFlows godoc
+// @Summary List flows
+// @Description Get a paginated list of flows for a tenant
+// @Tags flows
+// @Produce json
+// @Param tenant_id path string true "Tenant ID"
+// @Param page query int false "Page number" default(1)
+// @Param page_size query int false "Page size" default(20)
+// @Success 200 {object} spider.FlowListResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /tenants/{tenant_id}/flows [get]
 func (h *Handler) ListFlows(c *fiber.Ctx) error {
 	tenantID := c.Params("tenant_id")
 	if tenantID == "" {
@@ -101,6 +125,17 @@ func (h *Handler) ListFlows(c *fiber.Ctx) error {
 	return c.JSON(result)
 }
 
+// GetFlow godoc
+// @Summary Get flow details
+// @Description Get detailed information about a specific flow
+// @Tags flows
+// @Produce json
+// @Param tenant_id path string true "Tenant ID"
+// @Param id path string true "Flow ID"
+// @Success 200 {object} usecase.FlowDetailResponse
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /tenants/{tenant_id}/flows/{id} [get]
 func (h *Handler) GetFlow(c *fiber.Ctx) error {
 	tenantID := c.Params("tenant_id")
 	if tenantID == "" {
@@ -126,6 +161,19 @@ func (h *Handler) GetFlow(c *fiber.Ctx) error {
 	return c.JSON(result)
 }
 
+// UpdateFlow godoc
+// @Summary Update a flow
+// @Description Update an existing flow's properties
+// @Tags flows
+// @Accept json
+// @Produce json
+// @Param tenant_id path string true "Tenant ID"
+// @Param flow_id path string true "Flow ID"
+// @Param payload body object true "Flow update payload"
+// @Success 200 {object} spider.Flow
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /tenants/{tenant_id}/flows/{flow_id} [put]
 func (h *Handler) UpdateFlow(c *fiber.Ctx) error {
 	tenantID := c.Params("tenant_id")
 	if tenantID == "" {
@@ -178,6 +226,16 @@ func (h *Handler) UpdateFlow(c *fiber.Ctx) error {
 	return c.JSON(flow)
 }
 
+// DeleteFlow godoc
+// @Summary Delete a flow
+// @Description Delete an existing flow
+// @Tags flows
+// @Param tenant_id path string true "Tenant ID"
+// @Param flow_id path string true "Flow ID"
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /tenants/{tenant_id}/flows/{flow_id} [delete]
 func (h *Handler) DeleteFlow(c *fiber.Ctx) error {
 	tenantID := c.Params("tenant_id")
 	if tenantID == "" {

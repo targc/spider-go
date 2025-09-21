@@ -1,0 +1,392 @@
+basePath: /
+definitions:
+  github_com_targc_spider-go_pkg_spider.Flow:
+    properties:
+      id:
+        type: string
+      meta:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      status:
+        type: string
+      tenant_id:
+        type: string
+      trigger_type:
+        type: string
+      version:
+        type: integer
+    type: object
+  github_com_targc_spider-go_pkg_spider.FlowListResponse:
+    properties:
+      flows:
+        items:
+          $ref: '#/definitions/github_com_targc_spider-go_pkg_spider.WorkflowInfo'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  github_com_targc_spider-go_pkg_spider.Mapper:
+    properties:
+      mode:
+        type: string
+      value:
+        type: string
+    type: object
+  github_com_targc_spider-go_pkg_spider.WorkflowAction:
+    properties:
+      action_id:
+        type: string
+      config:
+        additionalProperties:
+          type: string
+        type: object
+      disabled:
+        type: boolean
+      id:
+        type: string
+      key:
+        type: string
+      map:
+        additionalProperties:
+          $ref: '#/definitions/github_com_targc_spider-go_pkg_spider.Mapper'
+        type: object
+      meta:
+        additionalProperties:
+          type: string
+        type: object
+      tenant_id:
+        type: string
+      workflow_id:
+        type: string
+    type: object
+  github_com_targc_spider-go_pkg_spider.WorkflowInfo:
+    properties:
+      id:
+        type: string
+      tenant_id:
+        type: string
+    type: object
+  github_com_targc_spider-go_pkg_spider_usecase.FlowDetailResponse:
+    properties:
+      actions:
+        items:
+          $ref: '#/definitions/github_com_targc_spider-go_pkg_spider.WorkflowAction'
+        type: array
+      flow_id:
+        type: string
+      flow_name:
+        type: string
+      tenant_id:
+        type: string
+    type: object
+  github_com_targc_spider-go_pkg_spider_usecase.FlowResponse:
+    properties:
+      flow_id:
+        type: string
+      flow_name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Multi-tenant workflow management system
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Spider Workflow API
+  version: "1.0"
+paths:
+  /tenants/{tenant_id}/flows:
+    get:
+      description: Get a paginated list of flows for a tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_targc_spider-go_pkg_spider.FlowListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List flows
+      tags:
+      - flows
+    post:
+      consumes:
+      - application/json
+      description: Create a new workflow flow for a tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Flow creation payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_targc_spider-go_pkg_spider_usecase.FlowResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new flow
+      tags:
+      - flows
+  /tenants/{tenant_id}/flows/{flow_id}:
+    delete:
+      description: Delete an existing flow
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Flow ID
+        in: path
+        name: flow_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a flow
+      tags:
+      - flows
+    put:
+      consumes:
+      - application/json
+      description: Update an existing flow's properties
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Flow ID
+        in: path
+        name: flow_id
+        required: true
+        type: string
+      - description: Flow update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_targc_spider-go_pkg_spider.Flow'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a flow
+      tags:
+      - flows
+  /tenants/{tenant_id}/flows/{id}:
+    get:
+      description: Get detailed information about a specific flow
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Flow ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_targc_spider-go_pkg_spider_usecase.FlowDetailResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get flow details
+      tags:
+      - flows
+  /tenants/{tenant_id}/workflows/{workflow_id}/actions/{key}:
+    put:
+      consumes:
+      - application/json
+      description: Update configuration of a workflow action
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      - description: Action Key
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: Action update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_targc_spider-go_pkg_spider.WorkflowAction'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a workflow action
+      tags:
+      - actions
+  /tenants/{tenant_id}/workflows/{workflow_id}/actions/{key}/disable:
+    post:
+      description: Disable a specific workflow action
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        type: string
+      - description: Action Key
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Disable a workflow action
+      tags:
+      - actions
+swagger: "2.0"
