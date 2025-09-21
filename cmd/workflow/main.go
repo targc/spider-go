@@ -26,8 +26,9 @@ type Peer struct {
 }
 
 type WorkflowCreatePayload struct {
-	Actions []WorkflowAction `json:"actions"`
-	Peers   []Peer           `json:"peers"`
+	TenantID string           `json:"tenant_id"`
+	Actions  []WorkflowAction `json:"actions"`
+	Peers    []Peer           `json:"peers"`
 }
 
 func main() {
@@ -65,12 +66,21 @@ func main() {
 		}
 
 		workflowID := workflowUUID.String()
+		
+		if payload.TenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id is required",
+			})
+		}
+		
+		tenantID := payload.TenantID
 
 		// TODO: validate graph & input mapper schema
 
 		for _, action := range payload.Actions {
 			_, err = storage.AddAction(
 				ctx,
+				tenantID,
 				workflowID,
 				action.Key,
 				action.ActionID,
@@ -86,6 +96,7 @@ func main() {
 		for _, peer := range payload.Peers {
 			err = storage.AddDep(
 				ctx,
+				tenantID,
 				workflowID,
 				peer.ParentKey,
 				peer.MetaOutput,
@@ -105,6 +116,7 @@ func main() {
 	app.Post("/workflow-action-disable", func(c *fiber.Ctx) error {
 
 		var payload struct {
+			TenantID   string `json:"tenant_id"`
 			WorkflowID string `json:"workflow_id"`
 			Key        string `json:"key"`
 		}
@@ -115,7 +127,13 @@ func main() {
 			return err
 		}
 
-		err = storage.DisableWorkflowAction(ctx, payload.WorkflowID, payload.Key)
+		if payload.TenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id is required",
+			})
+		}
+
+		err = storage.DisableWorkflowAction(ctx, payload.TenantID, payload.WorkflowID, payload.Key)
 
 		if err != nil {
 			return err

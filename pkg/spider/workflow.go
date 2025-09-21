@@ -84,7 +84,7 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 
 	err := w.messenger.ListenTriggerMessages(ctx, func(c TriggerMessageContext, m TriggerMessage) error {
 
-		workflowAction, err := w.storage.QueryWorkflowAction(c.Context, m.WorkflowID, m.Key)
+		workflowAction, err := w.storage.QueryWorkflowAction(c.Context, m.TenantID, m.WorkflowID, m.Key)
 
 		if err != nil {
 			slog.Error(
@@ -126,7 +126,7 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 
 		nextContextVal["$trigger"] = nextContextVal[m.Key]
 
-		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowID, m.Key, m.MetaOutput)
+		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.TenantID, m.WorkflowID, m.Key, m.MetaOutput)
 
 		if err != nil {
 			slog.Error("QueryWorkflowActionDependencies failed", slog.Any("error", err.Error()))
@@ -172,6 +172,7 @@ func (w *Workflow) listenTriggerMessages(ctx context.Context) error {
 				err = w.messenger.SendInputMessage(ctx, InputMessage{
 					SessionID:  sessionID,
 					TaskID:     nextTaskID,
+					TenantID:   dep.TenantID,
 					WorkflowID: dep.WorkflowID,
 					// TODO
 					// WorkflowActionID: dep.ID,
@@ -205,7 +206,7 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 
 	err := w.messenger.ListenOutputMessages(ctx, func(c OutputMessageContext, m OutputMessage) error {
 
-		workflowAction, err := w.storage.QueryWorkflowAction(c.Context, m.WorkflowID, m.Key)
+		workflowAction, err := w.storage.QueryWorkflowAction(c.Context, m.TenantID, m.WorkflowID, m.Key)
 
 		if err != nil {
 			slog.Error(
@@ -243,7 +244,7 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 			"output": wvalues,
 		}
 
-		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.WorkflowID, m.Key, m.MetaOutput)
+		deps, err := w.storage.QueryWorkflowActionDependencies(c.Context, m.TenantID, m.WorkflowID, m.Key, m.MetaOutput)
 
 		if err != nil {
 			slog.Error("QueryWorkflowActionDependencies failed", slog.Any("error", err.Error()))
@@ -296,6 +297,7 @@ func (w *Workflow) listenOutputMessages(ctx context.Context) error {
 				err = w.messenger.SendInputMessage(ctx, InputMessage{
 					SessionID:  m.SessionID,
 					TaskID:     nextTaskID,
+					TenantID:   dep.TenantID,
 					WorkflowID: dep.WorkflowID,
 					// TODO
 					// WorkflowActionID: dep.ID,

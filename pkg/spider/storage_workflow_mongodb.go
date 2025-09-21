@@ -81,6 +81,7 @@ func InitMongodDBWorkflowStorageAdapter(ctx context.Context, opt InitMongodDBWor
 		_, err = db.Collection("workflow_actions").Indexes().CreateOne(ctx, mongo.IndexModel{
 			Keys: bson.D{
 				{Key: "key", Value: -1},
+				{Key: "tenant_id", Value: -1},
 				{Key: "workflow_id", Value: -1},
 			},
 			Options: options.Index().SetUnique(true),
@@ -133,7 +134,7 @@ func NewMongodDBWorkflowStorageAdapter(client *mongo.Client, db *mongo.Database)
 	}
 }
 
-func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper) (*WorkflowAction, error) {
 
 	id, err := uuid.NewV7()
 
@@ -144,6 +145,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 	wa := MDWorkflowAction{
 		ID:         id.String(),
 		Key:        key,
+		TenantID:   tenantID,
 		WorkflowID: workflowID,
 		ActionID:   actionID,
 		Config:     conf,
@@ -160,6 +162,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 	return &WorkflowAction{
 		ID:         wa.ID,
 		Key:        wa.Key,
+		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
 		Map:        wa.Map,
@@ -169,6 +172,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, workflow
 
 func (w *MongodDBWorkflowStorageAdapter) AddDep(
 	ctx context.Context,
+	tenantID,
 	workflowID,
 	key,
 	metaOutput,
@@ -197,11 +201,12 @@ func (w *MongodDBWorkflowStorageAdapter) AddDep(
 	return nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context, workflowID, key string) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context, tenantID, workflowID, key string) (*WorkflowAction, error) {
 
 	result := w.workflowActionCollection.FindOne(
 		ctx,
 		bson.D{
+			{Key: "tenant_id", Value: tenantID},
 			{Key: "workflow_id", Value: workflowID},
 			{Key: "key", Value: key},
 		},
@@ -224,6 +229,7 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context
 	return &WorkflowAction{
 		ID:         wa.ID,
 		Key:        wa.Key,
+		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
 		Map:        wa.Map,
@@ -231,7 +237,7 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context
 	}, nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowActionDependencies(ctx context.Context, workflowID, key, metaOutput string) ([]WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowActionDependencies(ctx context.Context, tenantID, workflowID, key, metaOutput string) ([]WorkflowAction, error) {
 
 	cur, err := w.workflowActionDepCollection.Find(
 		ctx,
@@ -264,7 +270,7 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowActionDependencies(ctx con
 	var depActions []WorkflowAction
 
 	for _, dep := range deps {
-		depAction, err := w.QueryWorkflowAction(ctx, workflowID, dep.DepKey)
+		depAction, err := w.QueryWorkflowAction(ctx, tenantID, workflowID, dep.DepKey)
 
 		if err != nil {
 			continue
@@ -356,11 +362,12 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteSessionContext(ctx context.Contex
 	return nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) DisableWorkflowAction(ctx context.Context, workflowID, key string) error {
+func (w *MongodDBWorkflowStorageAdapter) DisableWorkflowAction(ctx context.Context, tenantID, workflowID, key string) error {
 
 	_, err := w.workflowActionCollection.UpdateOne(
 		ctx,
 		bson.D{
+			{Key: "tenant_id", Value: tenantID},
 			{Key: "workflow_id", Value: workflowID},
 			{Key: "key", Value: key},
 		},
@@ -388,6 +395,7 @@ func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 type MDWorkflowAction struct {
 	ID         string            `bson:"_id"`
 	Key        string            `bson:"key"`         // Composite unique index
+	TenantID   string            `bson:"tenant_id"`   // Composite unique index
 	WorkflowID string            `bson:"workflow_id"` // Composite unique index
 	ActionID   string            `bson:"action_id"`
 	Config     map[string]string `bson:"config"`

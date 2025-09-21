@@ -19,10 +19,15 @@ func main() {
 
 	storage := workflow.Storage()
 
+	tenantID := os.Getenv("TENANT_ID")
+	if tenantID == "" {
+		panic("TENANT_ID environment variable is required")
+	}
 	workflowID := "wa"
 
 	_, err = storage.AddAction(
 		ctx,
+		tenantID,
 		workflowID,
 		"a1",
 		"test-action-a",
@@ -38,6 +43,7 @@ func main() {
 
 	_, err = storage.AddAction(
 		ctx,
+		tenantID,
 		workflowID,
 		"a2",
 		"test-action-b",
@@ -58,6 +64,7 @@ func main() {
 
 	_, err = storage.AddAction(
 		ctx,
+		tenantID,
 		workflowID,
 		"a3",
 		"test-action-b",
@@ -76,13 +83,13 @@ func main() {
 		panic(err)
 	}
 
-	err = storage.AddDep(ctx, workflowID, "a1", "triggered", "a2")
+	err = storage.AddDep(ctx, tenantID, workflowID, "a1", "triggered", "a2")
 
 	if err != nil {
 		panic(err)
 	}
 
-	err = storage.AddDep(ctx, workflowID, "a2", "success", "a3")
+	err = storage.AddDep(ctx, tenantID, workflowID, "a2", "success", "a3")
 
 	if err != nil {
 		panic(err)
