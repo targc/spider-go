@@ -17,6 +17,7 @@ type WorkflowAction struct {
 	ActionID string                   `json:"action_id"`
 	Config   map[string]string        `json:"config"`
 	Mapper   map[string]spider.Mapper `json:"mapper"`
+	Meta     map[string]string        `json:"meta,omitempty"`
 }
 
 type Peer struct {
@@ -86,6 +87,7 @@ func main() {
 				action.ActionID,
 				action.Config,
 				action.Mapper,
+				action.Meta,
 			)
 
 			if err != nil {

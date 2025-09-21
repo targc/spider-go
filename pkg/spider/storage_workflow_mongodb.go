@@ -134,7 +134,7 @@ func NewMongodDBWorkflowStorageAdapter(client *mongo.Client, db *mongo.Database)
 	}
 }
 
-func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
 
 	id, err := uuid.NewV7()
 
@@ -150,6 +150,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID
 		ActionID:   actionID,
 		Config:     conf,
 		Map:        m,
+		Meta:       meta,
 		Disabled:   false,
 	}
 
@@ -166,6 +167,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
 		Map:        wa.Map,
+		Meta:       wa.Meta,
 		Disabled:   wa.Disabled,
 	}, nil
 }
@@ -233,6 +235,7 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
 		Map:        wa.Map,
+		Meta:       wa.Meta,
 		Disabled:   wa.Disabled,
 	}, nil
 }
@@ -400,6 +403,7 @@ type MDWorkflowAction struct {
 	ActionID   string            `bson:"action_id"`
 	Config     map[string]string `bson:"config"`
 	Map        map[string]Mapper `bson:"map"`
+	Meta       map[string]string `bson:"meta,omitempty"`
 	Disabled   bool              `bson:"disabled"`
 }
 

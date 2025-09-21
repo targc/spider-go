@@ -18,7 +18,7 @@ type Mapper struct {
 type WorkflowStorageAdapter interface {
 	QueryWorkflowAction(ctx context.Context, tenantID, workflowID, key string) (*WorkflowAction, error)
 	QueryWorkflowActionDependencies(ctx context.Context, tenantID, workflowID, key, metaOutput string) ([]WorkflowAction, error)
-	AddAction(ctx context.Context, tenantID, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper) (*WorkflowAction, error)
+	AddAction(ctx context.Context, tenantID, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error)
 	AddDep(ctx context.Context, tenantID, workflowID, key, metaOutput, key2 string) error
 	GetSessionContext(ctx context.Context, workflowID, sessionID, taskID string) (map[string]map[string]interface{}, error)
 	CreateSessionContext(ctx context.Context, workflowID, sessionID, taskID string, value map[string]map[string]interface{}) error
@@ -33,6 +33,7 @@ type WorkerConfig struct {
 	WorkflowID       string
 	Key              string
 	Config           map[string]string
+	Meta             map[string]string
 }
 
 type WorkerStorageAdapter interface {

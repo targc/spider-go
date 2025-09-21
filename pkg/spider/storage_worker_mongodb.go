@@ -87,6 +87,7 @@ func (w *MongodDBWorkerStorageAdapter) GetAllConfigs(ctx context.Context, action
 			WorkflowID:       workerAction.WorkflowID,
 			Key:              workerAction.Key,
 			Config:           workerAction.Config,
+			Meta:             workerAction.Meta,
 		})
 	}
 

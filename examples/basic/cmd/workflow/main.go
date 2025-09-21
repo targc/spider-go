@@ -35,6 +35,7 @@ func main() {
 			"test": "a",
 		},
 		nil,
+		nil, // meta
 	)
 
 	if err != nil {
@@ -55,6 +56,9 @@ func main() {
 				Mode:  spider.MapperModeExpression,
 				Value: "a1.output.value + '_updatedx1'",
 			},
+		},
+		map[string]string{ // meta
+			"description": "Second action in the workflow",
 		},
 	)
 
@@ -77,6 +81,7 @@ func main() {
 				Value: "a2.output.value + '_updatedx2'",
 			},
 		},
+		nil, // meta
 	)
 
 	if err != nil {
