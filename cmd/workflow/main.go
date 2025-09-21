@@ -13,7 +13,6 @@ import (
 )
 
 type WorkflowAction struct {
-	Name     string                   `json:"name"`
 	Key      string                   `json:"key"`
 	ActionID string                   `json:"action_id"`
 	Config   map[string]string        `json:"config"`
@@ -82,7 +81,6 @@ func main() {
 				WorkflowID: workflowID,
 				Key:        action.Key,
 				ActionID:   action.ActionID,
-				Name:       action.Name,
 				Config:     action.Config,
 				Map:        action.Mapper,
 				Meta:       action.Meta,
@@ -234,7 +232,6 @@ func main() {
 		}
 
 		var payload struct {
-			Name   string                   `json:"name"`
 			Config map[string]string        `json:"config"`
 			Mapper map[string]spider.Mapper `json:"mapper"`
 			Meta   map[string]string        `json:"meta,omitempty"`
@@ -250,7 +247,6 @@ func main() {
 			TenantID:   tenantID,
 			WorkflowID: workflowID,
 			Key:        key,
-			Name:       payload.Name,
 			Config:     payload.Config,
 			Map:        payload.Mapper,
 			Meta:       payload.Meta,

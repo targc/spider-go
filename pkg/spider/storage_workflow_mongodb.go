@@ -144,7 +144,6 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, req *Add
 
 	wa := MDWorkflowAction{
 		ID:         id.String(),
-		Name:       req.Name,
 		Key:        req.Key,
 		TenantID:   req.TenantID,
 		WorkflowID: req.WorkflowID,
@@ -163,7 +162,6 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, req *Add
 
 	return &WorkflowAction{
 		ID:         wa.ID,
-		Name:       wa.Name,
 		Key:        wa.Key,
 		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
@@ -233,7 +231,6 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context
 
 	return &WorkflowAction{
 		ID:         wa.ID,
-		Name:       wa.Name,
 		Key:        wa.Key,
 		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
@@ -500,7 +497,6 @@ func (w *MongodDBWorkflowStorageAdapter) GetWorkflowActions(ctx context.Context,
 
 		action := WorkflowAction{
 			ID:         wa.ID,
-			Name:       wa.Name,
 			Key:        wa.Key,
 			TenantID:   wa.TenantID,
 			WorkflowID: wa.WorkflowID,
@@ -521,7 +517,6 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, req *
 
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "name", Value: req.Name},
 			{Key: "config", Value: req.Config},
 			{Key: "map", Value: req.Map},
 			{Key: "meta", Value: req.Meta},
@@ -555,7 +550,6 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, req *
 
 	return &WorkflowAction{
 		ID:         wa.ID,
-		Name:       wa.Name,
 		Key:        wa.Key,
 		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
@@ -612,7 +606,6 @@ func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 
 type MDWorkflowAction struct {
 	ID         string            `bson:"_id"`
-	Name       string            `bson:"name"`
 	Key        string            `bson:"key"`         // Composite unique index
 	TenantID   string            `bson:"tenant_id"`   // Composite unique index
 	WorkflowID string            `bson:"workflow_id"` // Composite unique index
