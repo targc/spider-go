@@ -47,15 +47,17 @@ type UpdateActionRequest struct {
 }
 
 type Workflowdata struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	TenantID string `json:"tenant_id"`
+	ID       string            `json:"id"`
+	Name     string            `json:"name"`
+	TenantID string            `json:"tenant_id"`
+	Meta     map[string]string `json:"meta,omitempty"`
 }
 
 type CreateWorkflowRequest struct {
-	ID       string `json:"id"`
-	TenantID string `json:"tenant_id"`
-	Name     string `json:"name"`
+	ID       string            `json:"id"`
+	TenantID string            `json:"tenant_id"`
+	Name     string            `json:"name"`
+	Meta     map[string]string `json:"meta,omitempty"`
 }
 
 type WorkflowStorageAdapter interface {

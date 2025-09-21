@@ -54,9 +54,10 @@ func main() {
 		}
 
 		var payload struct {
-			Name    string           `json:"name"`
-			Actions []WorkflowAction `json:"actions"`
-			Peers   []Peer           `json:"peers"`
+			Name    string                `json:"name"`
+			Meta    map[string]string     `json:"meta,omitempty"`
+			Actions []WorkflowAction      `json:"actions"`
+			Peers   []Peer                `json:"peers"`
 		}
 
 		err = c.BodyParser(&payload)
@@ -82,6 +83,7 @@ func main() {
 			ID:       id.String(),
 			TenantID: tenantID,
 			Name:     payload.Name,
+			Meta:     payload.Meta,
 		})
 
 		if err != nil {

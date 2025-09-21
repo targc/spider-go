@@ -618,6 +618,7 @@ func (w *MongodDBWorkflowStorageAdapter) CreateWorkflow(ctx context.Context, req
 		ID:       req.ID,
 		Name:     req.Name,
 		TenantID: req.TenantID,
+		Meta:     req.Meta,
 	}
 
 	_, err := w.workflowCollection.InsertOne(ctx, workflow)
@@ -630,6 +631,7 @@ func (w *MongodDBWorkflowStorageAdapter) CreateWorkflow(ctx context.Context, req
 		ID:       workflow.ID,
 		Name:     workflow.Name,
 		TenantID: workflow.TenantID,
+		Meta:     workflow.Meta,
 	}, nil
 }
 
@@ -661,6 +663,7 @@ func (w *MongodDBWorkflowStorageAdapter) GetWorkflow(ctx context.Context, tenant
 		ID:       workflow.ID,
 		Name:     workflow.Name,
 		TenantID: workflow.TenantID,
+		Meta:     workflow.Meta,
 	}, nil
 }
 
@@ -669,9 +672,10 @@ func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 }
 
 type MDWorkflow struct {
-	ID       string `bson:"_id"`
-	Name     string `bson:"name"`
-	TenantID string `bson:"tenant_id"`
+	ID       string            `bson:"_id"`
+	Name     string            `bson:"name"`
+	TenantID string            `bson:"tenant_id"`
+	Meta     map[string]string `bson:"meta,omitempty"`
 }
 
 type MDWorkflowAction struct {
