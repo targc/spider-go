@@ -53,6 +53,13 @@ type CreateFlowRequest struct {
 	Meta     map[string]string `json:"meta,omitempty"`
 }
 
+type UpdateFlowRequest struct {
+	TenantID string            `json:"tenant_id"`
+	FlowID   string            `json:"flow_id"`
+	Name     string            `json:"name"`
+	Meta     map[string]string `json:"meta,omitempty"`
+}
+
 type WorkflowStorageAdapter interface {
 	QueryWorkflowAction(ctx context.Context, tenantID, workflowID, key string) (*WorkflowAction, error)
 	QueryWorkflowActionDependencies(ctx context.Context, tenantID, workflowID, key, metaOutput string) ([]WorkflowAction, error)
@@ -67,6 +74,7 @@ type WorkflowStorageAdapter interface {
 	UpdateAction(ctx context.Context, req *UpdateActionRequest) (*WorkflowAction, error)
 	CreateFlow(ctx context.Context, req *CreateFlowRequest) (*Flow, error)
 	GetFlow(ctx context.Context, tenantID, flowID string) (*Flow, error)
+	UpdateFlow(ctx context.Context, req *UpdateFlowRequest) (*Flow, error)
 	DeleteFlow(ctx context.Context, tenantID, flowID string) error
 	Close(ctx context.Context) error
 }

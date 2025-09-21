@@ -123,6 +123,47 @@ func (h *Handler) GetFlow(c *fiber.Ctx) error {
 	return c.JSON(result)
 }
 
+func (h *Handler) UpdateFlow(c *fiber.Ctx) error {
+	tenantID := c.Params("tenant_id")
+	if tenantID == "" {
+		return c.Status(400).JSON(map[string]string{
+			"error": "tenant_id is required",
+		})
+	}
+
+	flowID := c.Params("flow_id")
+	if flowID == "" {
+		return c.Status(400).JSON(map[string]string{
+			"error": "flow_id is required",
+		})
+	}
+
+	var payload struct {
+		Name string            `json:"name"`
+		Meta map[string]string `json:"meta,omitempty"`
+	}
+
+	err := c.BodyParser(&payload)
+	if err != nil {
+		return err
+	}
+
+	if payload.Name == "" {
+		return c.Status(400).JSON(map[string]string{
+			"error": "name is required",
+		})
+	}
+
+	flow, err := h.usecase.UpdateFlow(tenantID, flowID, payload.Name, payload.Meta)
+	if err != nil {
+		return c.Status(500).JSON(map[string]string{
+			"error": "Failed to update flow",
+		})
+	}
+
+	return c.JSON(flow)
+}
+
 func (h *Handler) DeleteFlow(c *fiber.Ctx) error {
 	tenantID := c.Params("tenant_id")
 	if tenantID == "" {

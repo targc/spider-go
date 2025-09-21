@@ -667,6 +667,30 @@ func (w *MongodDBWorkflowStorageAdapter) GetFlow(ctx context.Context, tenantID, 
 	}, nil
 }
 
+func (w *MongodDBWorkflowStorageAdapter) UpdateFlow(ctx context.Context, req *UpdateFlowRequest) (*Flow, error) {
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "name", Value: req.Name},
+			{Key: "meta", Value: req.Meta},
+		}},
+	}
+
+	_, err := w.workflowCollection.UpdateOne(
+		ctx,
+		bson.D{
+			{Key: "_id", Value: req.FlowID},
+			{Key: "tenant_id", Value: req.TenantID},
+		},
+		update,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return w.GetFlow(ctx, req.TenantID, req.FlowID)
+}
+
 func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 	return w.client.Disconnect(ctx)
 }

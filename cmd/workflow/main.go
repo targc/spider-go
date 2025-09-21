@@ -33,12 +33,16 @@ func main() {
 		return nil
 	})
 
-	app.Post("/tenants/:tenant_id/flows", handler.CreateFlow)
+	// flows
 	app.Get("/tenants/:tenant_id/flows", handler.ListFlows)
 	app.Get("/tenants/:tenant_id/flows/:id", handler.GetFlow)
+	app.Post("/tenants/:tenant_id/flows", handler.CreateFlow)
+	app.Put("/tenants/:tenant_id/flows/:flow_id", handler.UpdateFlow)
+	app.Delete("/tenants/:tenant_id/flows/:flow_id", handler.DeleteFlow)
+
+	// actions
 	app.Post("/tenants/:tenant_id/workflows/:workflow_id/actions/:key/disable", handler.DisableAction)
 	app.Put("/tenants/:tenant_id/workflows/:workflow_id/actions/:key", handler.UpdateAction)
-	app.Delete("/tenants/:tenant_id/flows/:flow_id", handler.DeleteFlow)
 
 	go worflow.Run(ctx)
 

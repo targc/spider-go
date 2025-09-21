@@ -118,6 +118,16 @@ func (u *Usecase) GetFlow(tenantID, flowID string) (*FlowDetailResponse, error) 
 	}, nil
 }
 
+func (u *Usecase) UpdateFlow(tenantID, flowID string, name string, meta map[string]string) (*spider.Flow, error) {
+	req := &spider.UpdateFlowRequest{
+		TenantID: tenantID,
+		FlowID:   flowID,
+		Name:     name,
+		Meta:     meta,
+	}
+	return u.storage.UpdateFlow(u.ctx, req)
+}
+
 func (u *Usecase) DeleteFlow(tenantID, flowID string) error {
 	return u.storage.DeleteFlow(u.ctx, tenantID, flowID)
 }
