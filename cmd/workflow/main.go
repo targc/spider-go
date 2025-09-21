@@ -209,6 +209,85 @@ func main() {
 		return nil
 	})
 
+	app.Put("/tenants/:tenant_id/workflows/:workflow_id/actions/:key", func(c *fiber.Ctx) error {
+
+		tenantID := c.Params("tenant_id")
+		if tenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id is required",
+			})
+		}
+
+		workflowID := c.Params("workflow_id")
+		if workflowID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "workflow_id is required",
+			})
+		}
+
+		key := c.Params("key")
+		if key == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "key is required",
+			})
+		}
+
+		var payload struct {
+			Config map[string]string        `json:"config"`
+			Mapper map[string]spider.Mapper `json:"mapper"`
+			Meta   map[string]string        `json:"meta,omitempty"`
+		}
+
+		err = c.BodyParser(&payload)
+
+		if err != nil {
+			return err
+		}
+
+		action, err := storage.UpdateAction(ctx, tenantID, workflowID, key, payload.Config, payload.Mapper, payload.Meta)
+
+		if err != nil {
+			return c.Status(500).JSON(map[string]string{
+				"error": "Failed to update action",
+			})
+		}
+
+		if action == nil {
+			return c.Status(404).JSON(map[string]string{
+				"error": "Action not found",
+			})
+		}
+
+		return c.JSON(action)
+	})
+
+	app.Delete("/tenants/:tenant_id/workflows/:workflow_id", func(c *fiber.Ctx) error {
+
+		tenantID := c.Params("tenant_id")
+		if tenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id is required",
+			})
+		}
+
+		workflowID := c.Params("workflow_id")
+		if workflowID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "workflow_id is required",
+			})
+		}
+
+		err = storage.DeleteWorkflow(ctx, tenantID, workflowID)
+
+		if err != nil {
+			return c.Status(500).JSON(map[string]string{
+				"error": "Failed to delete workflow",
+			})
+		}
+
+		return c.Status(204).Send(nil)
+	})
+
 	go worflow.Run(ctx)
 
 	go func() {

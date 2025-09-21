@@ -511,6 +511,93 @@ func (w *MongodDBWorkflowStorageAdapter) GetWorkflowActions(ctx context.Context,
 	return actions, nil
 }
 
+func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, tenantID, workflowID, key string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
+
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "config", Value: conf},
+			{Key: "map", Value: m},
+			{Key: "meta", Value: meta},
+		}},
+	}
+
+	result := w.workflowActionCollection.FindOneAndUpdate(
+		ctx,
+		bson.D{
+			{Key: "tenant_id", Value: tenantID},
+			{Key: "workflow_id", Value: workflowID},
+			{Key: "key", Value: key},
+		},
+		update,
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	)
+
+	err := result.Err()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var wa MDWorkflowAction
+
+	err = result.Decode(&wa)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &WorkflowAction{
+		ID:         wa.ID,
+		Key:        wa.Key,
+		TenantID:   wa.TenantID,
+		WorkflowID: wa.WorkflowID,
+		ActionID:   wa.ActionID,
+		Config:     wa.Config,
+		Map:        wa.Map,
+		Meta:       wa.Meta,
+		Disabled:   wa.Disabled,
+	}, nil
+}
+
+func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, tenantID, workflowID string) error {
+
+	_, err := w.workflowActionCollection.DeleteMany(
+		ctx,
+		bson.D{
+			{Key: "tenant_id", Value: tenantID},
+			{Key: "workflow_id", Value: workflowID},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = w.workflowActionDepCollection.DeleteMany(
+		ctx,
+		bson.D{
+			{Key: "workflow_id", Value: workflowID},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = w.workflowSessionContextCollection.DeleteMany(
+		ctx,
+		bson.D{
+			{Key: "workflow_id", Value: workflowID},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 	return w.client.Disconnect(ctx)
 }

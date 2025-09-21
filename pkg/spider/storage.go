@@ -38,6 +38,8 @@ type WorkflowStorageAdapter interface {
 	DisableWorkflowAction(ctx context.Context, tenantID, workflowID, key string) error
 	ListWorkflows(ctx context.Context, tenantID string, page, pageSize int) (*WorkflowListResponse, error)
 	GetWorkflowActions(ctx context.Context, tenantID, workflowID string) ([]WorkflowAction, error)
+	UpdateAction(ctx context.Context, tenantID, workflowID, key string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error)
+	DeleteWorkflow(ctx context.Context, tenantID, workflowID string) error
 	Close(ctx context.Context) error
 }
 
