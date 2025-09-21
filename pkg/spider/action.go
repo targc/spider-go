@@ -1,13 +1,13 @@
 package spider
 
 type WorkflowAction struct {
-	ID         string
-	Key        string
-	TenantID   string
-	WorkflowID string
-	ActionID   string
-	Config     map[string]string
-	Map        map[string]Mapper
-	Meta       map[string]string
-	Disabled   bool
+	ID         string            `json:"id"`
+	Key        string            `json:"key"`
+	TenantID   string            `json:"tenant_id"`
+	WorkflowID string            `json:"workflow_id"`
+	ActionID   string            `json:"action_id"`
+	Config     map[string]string `json:"config"`
+	Map        map[string]Mapper `json:"map"`
+	Meta       map[string]string `json:"meta,omitempty"`
+	Disabled   bool              `json:"disabled"`
 }

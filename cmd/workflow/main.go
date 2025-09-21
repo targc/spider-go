@@ -67,13 +67,13 @@ func main() {
 		}
 
 		workflowID := workflowUUID.String()
-		
+
 		if payload.TenantID == "" {
 			return c.Status(400).JSON(map[string]string{
 				"error": "tenant_id is required",
 			})
 		}
-		
+
 		tenantID := payload.TenantID
 
 		// TODO: validate graph & input mapper schema
@@ -112,6 +112,69 @@ func main() {
 
 		return c.JSON(map[string]interface{}{
 			"workflow_id": workflowID,
+		})
+	})
+
+	app.Get("/workflows", func(c *fiber.Ctx) error {
+		tenantID := c.Query("tenant_id")
+		if tenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id query parameter is required",
+			})
+		}
+
+		page := c.QueryInt("page", 1)
+		if page < 1 {
+			page = 1
+		}
+
+		pageSize := c.QueryInt("page_size", 20)
+		if pageSize < 1 || pageSize > 100 {
+			pageSize = 20
+		}
+
+		result, err := storage.ListWorkflows(ctx, tenantID, page, pageSize)
+		if err != nil {
+			return c.Status(500).JSON(map[string]string{
+				"error": "Failed to list workflows",
+			})
+		}
+
+		return c.JSON(result)
+	})
+
+	app.Get("/workflows/:id", func(c *fiber.Ctx) error {
+		workflowID := c.Params("id")
+		if workflowID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "workflow id is required",
+			})
+		}
+
+		tenantID := c.Query("tenant_id")
+		if tenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id query parameter is required",
+			})
+		}
+
+		actions, err := storage.GetWorkflowActions(ctx, tenantID, workflowID)
+		if err != nil {
+			return c.Status(500).JSON(map[string]string{
+				"error": "Failed to get workflow",
+			})
+		}
+
+		if len(actions) == 0 {
+			return c.Status(404).JSON(map[string]string{
+				"error": "Workflow not found",
+			})
+		}
+
+		return c.JSON(map[string]interface{}{
+			"workflow_id": workflowID,
+			"tenant_id":   tenantID,
+			"actions":     actions,
 		})
 	})
 

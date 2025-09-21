@@ -391,6 +391,126 @@ func (w *MongodDBWorkflowStorageAdapter) DisableWorkflowAction(ctx context.Conte
 	return nil
 }
 
+func (w *MongodDBWorkflowStorageAdapter) ListWorkflows(ctx context.Context, tenantID string, page, pageSize int) (*WorkflowListResponse, error) {
+
+	skip := (page - 1) * pageSize
+
+	pipeline := bson.A{
+		bson.D{{Key: "$match", Value: bson.D{{Key: "tenant_id", Value: tenantID}}}},
+		bson.D{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$workflow_id"},
+			{Key: "tenant_id", Value: bson.D{{Key: "$first", Value: "$tenant_id"}}},
+		}}},
+		bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: -1}}}},
+	}
+
+	countPipeline := append(pipeline, bson.D{{Key: "$count", Value: "total"}})
+
+	countCur, err := w.workflowActionCollection.Aggregate(ctx, countPipeline)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var countResult []bson.M
+
+	err = countCur.All(ctx, &countResult)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var total int64 = 0
+
+	if len(countResult) > 0 {
+		if totalVal, ok := countResult[0]["total"].(int32); ok {
+			total = int64(totalVal)
+		}
+	}
+
+	paginationPipeline := append(pipeline,
+		bson.D{{Key: "$skip", Value: skip}},
+		bson.D{{Key: "$limit", Value: pageSize}},
+	)
+
+	cur, err := w.workflowActionCollection.Aggregate(ctx, paginationPipeline)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var workflows []WorkflowInfo
+
+	for cur.TryNext(ctx) {
+
+		var result bson.M
+
+		err := cur.Decode(&result)
+
+		if err != nil {
+			continue
+		}
+
+		workflow := WorkflowInfo{
+			ID:       result["_id"].(string),
+			TenantID: result["tenant_id"].(string),
+		}
+
+		workflows = append(workflows, workflow)
+	}
+
+	return &WorkflowListResponse{
+		Workflows: workflows,
+		Total:     total,
+		Page:      page,
+		PageSize:  pageSize,
+	}, nil
+}
+
+func (w *MongodDBWorkflowStorageAdapter) GetWorkflowActions(ctx context.Context, tenantID, workflowID string) ([]WorkflowAction, error) {
+
+	cur, err := w.workflowActionCollection.Find(
+		ctx,
+		bson.D{
+			{Key: "tenant_id", Value: tenantID},
+			{Key: "workflow_id", Value: workflowID},
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var actions []WorkflowAction
+
+	for cur.TryNext(ctx) {
+
+		var wa MDWorkflowAction
+
+		err := cur.Decode(&wa)
+
+		if err != nil {
+			continue
+		}
+
+		action := WorkflowAction{
+			ID:         wa.ID,
+			Key:        wa.Key,
+			TenantID:   wa.TenantID,
+			WorkflowID: wa.WorkflowID,
+			ActionID:   wa.ActionID,
+			Config:     wa.Config,
+			Map:        wa.Map,
+			Meta:       wa.Meta,
+			Disabled:   wa.Disabled,
+		}
+
+		actions = append(actions, action)
+	}
+
+	return actions, nil
+}
+
 func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 	return w.client.Disconnect(ctx)
 }

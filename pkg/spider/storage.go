@@ -15,6 +15,18 @@ type Mapper struct {
 	Value string     `json:"value"`
 }
 
+type WorkflowInfo struct {
+	ID       string `json:"id"`
+	TenantID string `json:"tenant_id"`
+}
+
+type WorkflowListResponse struct {
+	Workflows []WorkflowInfo `json:"workflows"`
+	Total     int64          `json:"total"`
+	Page      int            `json:"page"`
+	PageSize  int            `json:"page_size"`
+}
+
 type WorkflowStorageAdapter interface {
 	QueryWorkflowAction(ctx context.Context, tenantID, workflowID, key string) (*WorkflowAction, error)
 	QueryWorkflowActionDependencies(ctx context.Context, tenantID, workflowID, key, metaOutput string) ([]WorkflowAction, error)
@@ -24,16 +36,18 @@ type WorkflowStorageAdapter interface {
 	CreateSessionContext(ctx context.Context, workflowID, sessionID, taskID string, value map[string]map[string]interface{}) error
 	DeleteSessionContext(ctx context.Context, workflowID, sessionID, taskID string) error
 	DisableWorkflowAction(ctx context.Context, tenantID, workflowID, key string) error
+	ListWorkflows(ctx context.Context, tenantID string, page, pageSize int) (*WorkflowListResponse, error)
+	GetWorkflowActions(ctx context.Context, tenantID, workflowID string) ([]WorkflowAction, error)
 	Close(ctx context.Context) error
 }
 
 type WorkerConfig struct {
-	WorkflowActionID string
-	TenantID         string
-	WorkflowID       string
-	Key              string
-	Config           map[string]string
-	Meta             map[string]string
+	WorkflowActionID string            `json:"workflow_action_id"`
+	TenantID         string            `json:"tenant_id"`
+	WorkflowID       string            `json:"workflow_id"`
+	Key              string            `json:"key"`
+	Config           map[string]string `json:"config"`
+	Meta             map[string]string `json:"meta,omitempty"`
 }
 
 type WorkerStorageAdapter interface {
