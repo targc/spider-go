@@ -44,7 +44,7 @@ func main() {
 		return nil
 	})
 
-	app.Post("/tenants/:tenant_id/workflows", func(c *fiber.Ctx) error {
+	app.Post("/tenants/:tenant_id/flows", func(c *fiber.Ctx) error {
 
 		tenantID := c.Params("tenant_id")
 		if tenantID == "" {
@@ -54,10 +54,10 @@ func main() {
 		}
 
 		var payload struct {
-			Name    string                `json:"name"`
-			Meta    map[string]string     `json:"meta,omitempty"`
-			Actions []WorkflowAction      `json:"actions"`
-			Peers   []Peer                `json:"peers"`
+			Name    string            `json:"name"`
+			Meta    map[string]string `json:"meta,omitempty"`
+			Actions []WorkflowAction  `json:"actions"`
+			Peers   []Peer            `json:"peers"`
 		}
 
 		err = c.BodyParser(&payload)
@@ -79,7 +79,7 @@ func main() {
 			})
 		}
 
-		workflow, err := storage.CreateWorkflow(ctx, &spider.CreateWorkflowRequest{
+		flow, err := storage.CreateFlow(ctx, &spider.CreateFlowRequest{
 			ID:       id.String(),
 			TenantID: tenantID,
 			Name:     payload.Name,
@@ -88,11 +88,11 @@ func main() {
 
 		if err != nil {
 			return c.Status(500).JSON(map[string]string{
-				"error": "Failed to create workflow",
+				"error": "Failed to create flow",
 			})
 		}
 
-		workflowID := workflow.ID
+		workflowID := flow.ID
 
 		// TODO: validate graph & input mapper schema
 
@@ -128,12 +128,12 @@ func main() {
 		}
 
 		return c.JSON(map[string]interface{}{
-			"workflow_id":   workflowID,
-			"workflow_name": workflow.Name,
+			"flow_id":   workflowID,
+			"flow_name": flow.Name,
 		})
 	})
 
-	app.Get("/tenants/:tenant_id/workflows", func(c *fiber.Ctx) error {
+	app.Get("/tenants/:tenant_id/flows", func(c *fiber.Ctx) error {
 		tenantID := c.Params("tenant_id")
 		if tenantID == "" {
 			return c.Status(400).JSON(map[string]string{
@@ -151,17 +151,17 @@ func main() {
 			pageSize = 20
 		}
 
-		result, err := storage.ListWorkflows(ctx, tenantID, page, pageSize)
+		result, err := storage.ListFlows(ctx, tenantID, page, pageSize)
 		if err != nil {
 			return c.Status(500).JSON(map[string]string{
-				"error": "Failed to list workflows",
+				"error": "Failed to list flows",
 			})
 		}
 
 		return c.JSON(result)
 	})
 
-	app.Get("/tenants/:tenant_id/workflows/:id", func(c *fiber.Ctx) error {
+	app.Get("/tenants/:tenant_id/flows/:id", func(c *fiber.Ctx) error {
 		tenantID := c.Params("tenant_id")
 		if tenantID == "" {
 			return c.Status(400).JSON(map[string]string{
@@ -169,32 +169,32 @@ func main() {
 			})
 		}
 
-		workflowID := c.Params("id")
-		if workflowID == "" {
+		flowID := c.Params("id")
+		if flowID == "" {
 			return c.Status(400).JSON(map[string]string{
-				"error": "workflow id is required",
+				"error": "flow id is required",
 			})
 		}
 
-		workflow, err := storage.GetWorkflow(ctx, tenantID, workflowID)
+		flow, err := storage.GetFlow(ctx, tenantID, flowID)
 		if err != nil {
 			return c.Status(404).JSON(map[string]string{
-				"error": "Workflow not found",
+				"error": "Flow not found",
 			})
 		}
 
-		actions, err := storage.GetWorkflowActions(ctx, tenantID, workflowID)
+		actions, err := storage.GetWorkflowActions(ctx, tenantID, flowID)
 		if err != nil {
 			return c.Status(500).JSON(map[string]string{
-				"error": "Failed to get workflow actions",
+				"error": "Failed to get flow actions",
 			})
 		}
 
 		return c.JSON(map[string]interface{}{
-			"workflow_id":   workflowID,
-			"workflow_name": workflow.Name,
-			"tenant_id":     tenantID,
-			"actions":       actions,
+			"flow_id":   flowID,
+			"flow_name": flow.Name,
+			"tenant_id": tenantID,
+			"actions":   actions,
 		})
 	})
 
@@ -291,7 +291,7 @@ func main() {
 		return c.JSON(action)
 	})
 
-	app.Delete("/tenants/:tenant_id/workflows/:workflow_id", func(c *fiber.Ctx) error {
+	app.Delete("/tenants/:tenant_id/flows/:flow_id", func(c *fiber.Ctx) error {
 
 		tenantID := c.Params("tenant_id")
 		if tenantID == "" {
@@ -300,18 +300,18 @@ func main() {
 			})
 		}
 
-		workflowID := c.Params("workflow_id")
-		if workflowID == "" {
+		flowID := c.Params("flow_id")
+		if flowID == "" {
 			return c.Status(400).JSON(map[string]string{
-				"error": "workflow_id is required",
+				"error": "flow_id is required",
 			})
 		}
 
-		err = storage.DeleteWorkflow(ctx, tenantID, workflowID)
+		err = storage.DeleteFlow(ctx, tenantID, flowID)
 
 		if err != nil {
 			return c.Status(500).JSON(map[string]string{
-				"error": "Failed to delete workflow",
+				"error": "Failed to delete flow",
 			})
 		}
 

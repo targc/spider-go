@@ -20,11 +20,11 @@ type WorkflowInfo struct {
 	TenantID string `json:"tenant_id"`
 }
 
-type WorkflowListResponse struct {
-	Workflows []WorkflowInfo `json:"workflows"`
-	Total     int64          `json:"total"`
-	Page      int            `json:"page"`
-	PageSize  int            `json:"page_size"`
+type FlowListResponse struct {
+	Flows    []WorkflowInfo `json:"flows"`
+	Total    int64          `json:"total"`
+	Page     int            `json:"page"`
+	PageSize int            `json:"page_size"`
 }
 
 type AddActionRequest struct {
@@ -46,14 +46,7 @@ type UpdateActionRequest struct {
 	Meta       map[string]string `json:"meta,omitempty"`
 }
 
-type Workflowdata struct {
-	ID       string            `json:"id"`
-	Name     string            `json:"name"`
-	TenantID string            `json:"tenant_id"`
-	Meta     map[string]string `json:"meta,omitempty"`
-}
-
-type CreateWorkflowRequest struct {
+type CreateFlowRequest struct {
 	ID       string            `json:"id"`
 	TenantID string            `json:"tenant_id"`
 	Name     string            `json:"name"`
@@ -69,12 +62,12 @@ type WorkflowStorageAdapter interface {
 	CreateSessionContext(ctx context.Context, workflowID, sessionID, taskID string, value map[string]map[string]interface{}) error
 	DeleteSessionContext(ctx context.Context, workflowID, sessionID, taskID string) error
 	DisableWorkflowAction(ctx context.Context, tenantID, workflowID, key string) error
-	ListWorkflows(ctx context.Context, tenantID string, page, pageSize int) (*WorkflowListResponse, error)
+	ListFlows(ctx context.Context, tenantID string, page, pageSize int) (*FlowListResponse, error)
 	GetWorkflowActions(ctx context.Context, tenantID, workflowID string) ([]WorkflowAction, error)
 	UpdateAction(ctx context.Context, req *UpdateActionRequest) (*WorkflowAction, error)
-	CreateWorkflow(ctx context.Context, req *CreateWorkflowRequest) (*Workflowdata, error)
-	GetWorkflow(ctx context.Context, tenantID, workflowID string) (*Workflowdata, error)
-	DeleteWorkflow(ctx context.Context, tenantID, workflowID string) error
+	CreateFlow(ctx context.Context, req *CreateFlowRequest) (*Flow, error)
+	GetFlow(ctx context.Context, tenantID, flowID string) (*Flow, error)
+	DeleteFlow(ctx context.Context, tenantID, flowID string) error
 	Close(ctx context.Context) error
 }
 

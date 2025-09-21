@@ -393,7 +393,7 @@ func (w *MongodDBWorkflowStorageAdapter) DisableWorkflowAction(ctx context.Conte
 	return nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) ListWorkflows(ctx context.Context, tenantID string, page, pageSize int) (*WorkflowListResponse, error) {
+func (w *MongodDBWorkflowStorageAdapter) ListFlows(ctx context.Context, tenantID string, page, pageSize int) (*FlowListResponse, error) {
 
 	skip := (page - 1) * pageSize
 
@@ -461,11 +461,11 @@ func (w *MongodDBWorkflowStorageAdapter) ListWorkflows(ctx context.Context, tena
 		workflows = append(workflows, workflow)
 	}
 
-	return &WorkflowListResponse{
-		Workflows: workflows,
-		Total:     total,
-		Page:      page,
-		PageSize:  pageSize,
+	return &FlowListResponse{
+		Flows:    workflows,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
 	}, nil
 }
 
@@ -561,12 +561,12 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, req *
 	}, nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, tenantID, workflowID string) error {
+func (w *MongodDBWorkflowStorageAdapter) DeleteFlow(ctx context.Context, tenantID, flowID string) error {
 
 	_, err := w.workflowCollection.DeleteOne(
 		ctx,
 		bson.D{
-			{Key: "_id", Value: workflowID},
+			{Key: "_id", Value: flowID},
 			{Key: "tenant_id", Value: tenantID},
 		},
 	)
@@ -579,7 +579,7 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, ten
 		ctx,
 		bson.D{
 			{Key: "tenant_id", Value: tenantID},
-			{Key: "workflow_id", Value: workflowID},
+			{Key: "workflow_id", Value: flowID},
 		},
 	)
 
@@ -590,7 +590,7 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, ten
 	_, err = w.workflowActionDepCollection.DeleteMany(
 		ctx,
 		bson.D{
-			{Key: "workflow_id", Value: workflowID},
+			{Key: "workflow_id", Value: flowID},
 		},
 	)
 
@@ -601,7 +601,7 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, ten
 	_, err = w.workflowSessionContextCollection.DeleteMany(
 		ctx,
 		bson.D{
-			{Key: "workflow_id", Value: workflowID},
+			{Key: "workflow_id", Value: flowID},
 		},
 	)
 
@@ -612,35 +612,35 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, ten
 	return nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) CreateWorkflow(ctx context.Context, req *CreateWorkflowRequest) (*Workflowdata, error) {
+func (w *MongodDBWorkflowStorageAdapter) CreateFlow(ctx context.Context, req *CreateFlowRequest) (*Flow, error) {
 
-	workflow := MDWorkflow{
+	flow := MDFlow{
 		ID:       req.ID,
 		Name:     req.Name,
 		TenantID: req.TenantID,
 		Meta:     req.Meta,
 	}
 
-	_, err := w.workflowCollection.InsertOne(ctx, workflow)
+	_, err := w.workflowCollection.InsertOne(ctx, flow)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &Workflowdata{
-		ID:       workflow.ID,
-		Name:     workflow.Name,
-		TenantID: workflow.TenantID,
-		Meta:     workflow.Meta,
+	return &Flow{
+		ID:       flow.ID,
+		Name:     flow.Name,
+		TenantID: flow.TenantID,
+		Meta:     flow.Meta,
 	}, nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) GetWorkflow(ctx context.Context, tenantID, workflowID string) (*Workflowdata, error) {
+func (w *MongodDBWorkflowStorageAdapter) GetFlow(ctx context.Context, tenantID, flowID string) (*Flow, error) {
 
 	result := w.workflowCollection.FindOne(
 		ctx,
 		bson.D{
-			{Key: "_id", Value: workflowID},
+			{Key: "_id", Value: flowID},
 			{Key: "tenant_id", Value: tenantID},
 		},
 	)
@@ -651,19 +651,19 @@ func (w *MongodDBWorkflowStorageAdapter) GetWorkflow(ctx context.Context, tenant
 		return nil, err
 	}
 
-	var workflow MDWorkflow
+	var flow MDFlow
 
-	err = result.Decode(&workflow)
+	err = result.Decode(&flow)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &Workflowdata{
-		ID:       workflow.ID,
-		Name:     workflow.Name,
-		TenantID: workflow.TenantID,
-		Meta:     workflow.Meta,
+	return &Flow{
+		ID:       flow.ID,
+		Name:     flow.Name,
+		TenantID: flow.TenantID,
+		Meta:     flow.Meta,
 	}, nil
 }
 
@@ -671,7 +671,7 @@ func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 	return w.client.Disconnect(ctx)
 }
 
-type MDWorkflow struct {
+type MDFlow struct {
 	ID       string            `bson:"_id"`
 	Name     string            `bson:"name"`
 	TenantID string            `bson:"tenant_id"`
