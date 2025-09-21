@@ -409,65 +409,43 @@ func (w *MongodDBWorkflowStorageAdapter) ListFlows(ctx context.Context, tenantID
 
 	skip := (page - 1) * pageSize
 
-	pipeline := bson.A{
-		bson.D{{Key: "$match", Value: bson.D{{Key: "tenant_id", Value: tenantID}}}},
-		bson.D{{Key: "$group", Value: bson.D{
-			{Key: "_id", Value: "$workflow_id"},
-			{Key: "tenant_id", Value: bson.D{{Key: "$first", Value: "$tenant_id"}}},
-		}}},
-		bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: -1}}}},
-	}
-
-	countPipeline := append(pipeline, bson.D{{Key: "$count", Value: "total"}})
-
-	countCur, err := w.workflowActionCollection.Aggregate(ctx, countPipeline)
-
+	// Count total flows
+	countFilter := bson.D{{Key: "tenant_id", Value: tenantID}}
+	total, err := w.workflowCollection.CountDocuments(ctx, countFilter)
 	if err != nil {
 		return nil, err
 	}
 
-	var countResult []bson.M
+	// Get paginated flows
+	filter := bson.D{{Key: "tenant_id", Value: tenantID}}
+	findOptions := options.Find().
+		SetSkip(int64(skip)).
+		SetLimit(int64(pageSize)).
+		SetSort(bson.D{{Key: "_id", Value: -1}})
 
-	err = countCur.All(ctx, &countResult)
-
+	cur, err := w.workflowCollection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return nil, err
 	}
-
-	var total int64 = 0
-
-	if len(countResult) > 0 {
-		if totalVal, ok := countResult[0]["total"].(int32); ok {
-			total = int64(totalVal)
-		}
-	}
-
-	paginationPipeline := append(pipeline,
-		bson.D{{Key: "$skip", Value: skip}},
-		bson.D{{Key: "$limit", Value: pageSize}},
-	)
-
-	cur, err := w.workflowActionCollection.Aggregate(ctx, paginationPipeline)
-
-	if err != nil {
-		return nil, err
-	}
+	defer cur.Close(ctx)
 
 	var workflows []WorkflowInfo
 
-	for cur.TryNext(ctx) {
-
-		var result bson.M
-
-		err := cur.Decode(&result)
-
+	for cur.Next(ctx) {
+		var mdFlow MDFlow
+		err := cur.Decode(&mdFlow)
 		if err != nil {
 			continue
 		}
 
 		workflow := WorkflowInfo{
-			ID:       result["_id"].(string),
-			TenantID: result["tenant_id"].(string),
+			ID:          mdFlow.ID,
+			TenantID:    mdFlow.TenantID,
+			Name:        mdFlow.Name,
+			TriggerType: mdFlow.TriggerType,
+			Status:      mdFlow.Status,
+			Version:     mdFlow.Version,
+			Meta:        mdFlow.Meta,
 		}
 
 		workflows = append(workflows, workflow)

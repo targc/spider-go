@@ -554,8 +554,26 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
                 "tenant_id": {
                     "type": "string"
+                },
+                "trigger_type": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
                 }
             }
         },

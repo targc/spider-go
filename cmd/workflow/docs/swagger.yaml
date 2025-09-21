@@ -70,8 +70,20 @@ definitions:
     properties:
       id:
         type: string
+      meta:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      status:
+        type: string
       tenant_id:
         type: string
+      trigger_type:
+        type: string
+      version:
+        type: integer
     type: object
   github_com_targc_spider-go_pkg_spider_usecase.FlowDetailResponse:
     properties:

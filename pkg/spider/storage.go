@@ -16,8 +16,13 @@ type Mapper struct {
 }
 
 type WorkflowInfo struct {
-	ID       string `json:"id"`
-	TenantID string `json:"tenant_id"`
+	ID          string            `json:"id"`
+	TenantID    string            `json:"tenant_id"`
+	Name        string            `json:"name"`
+	TriggerType FlowTriggerType   `json:"trigger_type"`
+	Status      FlowStatus        `json:"status"`
+	Version     uint64            `json:"version"`
+	Meta        map[string]string `json:"meta,omitempty"`
 }
 
 type FlowListResponse struct {
