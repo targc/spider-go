@@ -13,7 +13,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param tenant_id path string true "Tenant ID"
-// @Param payload body object true "Flow creation payload"
+// @Param payload body CreateFlowPayload true "Flow creation payload"
 // @Success 200 {object} usecase.FlowResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -169,7 +169,7 @@ func (h *Handler) GetFlow(c *fiber.Ctx) error {
 // @Produce json
 // @Param tenant_id path string true "Tenant ID"
 // @Param flow_id path string true "Flow ID"
-// @Param payload body object true "Flow update payload"
+// @Param payload body UpdateFlowPayload true "Flow update payload"
 // @Success 200 {object} spider.Flow
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

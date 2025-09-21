@@ -59,7 +59,7 @@ func (h *Handler) DisableAction(c *fiber.Ctx) error {
 // @Param tenant_id path string true "Tenant ID"
 // @Param workflow_id path string true "Workflow ID"
 // @Param key path string true "Action Key"
-// @Param payload body object true "Action update payload"
+// @Param payload body UpdateActionPayload true "Action update payload"
 // @Success 200 {object} spider.WorkflowAction
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string

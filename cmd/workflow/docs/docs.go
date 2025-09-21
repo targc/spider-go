@@ -110,7 +110,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/pkg_spider_apis.CreateFlowPayload"
                         }
                     }
                 ],
@@ -176,7 +176,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/pkg_spider_apis.UpdateFlowPayload"
                         }
                     }
                 ],
@@ -349,7 +349,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/pkg_spider_apis.UpdateActionPayload"
                         }
                     }
                 ],
@@ -587,6 +587,128 @@ const docTemplate = `{
                 },
                 "flow_name": {
                     "type": "string"
+                }
+            }
+        },
+        "pkg_spider_apis.CreateFlowPayload": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pkg_spider_apis.WorkflowAction"
+                    }
+                },
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "My Workflow"
+                },
+                "peers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pkg_spider_apis.Peer"
+                    }
+                },
+                "trigger_type": {
+                    "type": "string",
+                    "example": "event"
+                }
+            }
+        },
+        "pkg_spider_apis.Peer": {
+            "type": "object",
+            "properties": {
+                "child_key": {
+                    "type": "string"
+                },
+                "meta_output": {
+                    "type": "string"
+                },
+                "parent_key": {
+                    "type": "string"
+                }
+            }
+        },
+        "pkg_spider_apis.UpdateActionPayload": {
+            "type": "object",
+            "properties": {
+                "config": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "mapper": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/github_com_targc_spider-go_pkg_spider.Mapper"
+                    }
+                },
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "pkg_spider_apis.UpdateFlowPayload": {
+            "type": "object",
+            "properties": {
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Updated Workflow"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "trigger_type": {
+                    "type": "string",
+                    "example": "schedule"
+                }
+            }
+        },
+        "pkg_spider_apis.WorkflowAction": {
+            "type": "object",
+            "properties": {
+                "action_id": {
+                    "type": "string",
+                    "example": "slack-action"
+                },
+                "config": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "key": {
+                    "type": "string",
+                    "example": "a1"
+                },
+                "mapper": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/github_com_targc_spider-go_pkg_spider.Mapper"
+                    }
+                },
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         }
