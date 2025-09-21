@@ -26,11 +26,6 @@ type Peer struct {
 	ChildKey   string `json:"child_key"`
 }
 
-type WorkflowCreatePayload struct {
-	TenantID string           `json:"tenant_id"`
-	Actions  []WorkflowAction `json:"actions"`
-	Peers    []Peer           `json:"peers"`
-}
 
 func main() {
 
@@ -50,9 +45,19 @@ func main() {
 		return nil
 	})
 
-	app.Post("/workflows", func(c *fiber.Ctx) error {
+	app.Post("/tenants/:tenant_id/workflows", func(c *fiber.Ctx) error {
 
-		var payload WorkflowCreatePayload
+		tenantID := c.Params("tenant_id")
+		if tenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id is required",
+			})
+		}
+
+		var payload struct {
+			Actions []WorkflowAction `json:"actions"`
+			Peers   []Peer           `json:"peers"`
+		}
 
 		err = c.BodyParser(&payload)
 
@@ -67,14 +72,6 @@ func main() {
 		}
 
 		workflowID := workflowUUID.String()
-
-		if payload.TenantID == "" {
-			return c.Status(400).JSON(map[string]string{
-				"error": "tenant_id is required",
-			})
-		}
-
-		tenantID := payload.TenantID
 
 		// TODO: validate graph & input mapper schema
 
@@ -115,11 +112,11 @@ func main() {
 		})
 	})
 
-	app.Get("/workflows", func(c *fiber.Ctx) error {
-		tenantID := c.Query("tenant_id")
+	app.Get("/tenants/:tenant_id/workflows", func(c *fiber.Ctx) error {
+		tenantID := c.Params("tenant_id")
 		if tenantID == "" {
 			return c.Status(400).JSON(map[string]string{
-				"error": "tenant_id query parameter is required",
+				"error": "tenant_id is required",
 			})
 		}
 
@@ -143,18 +140,18 @@ func main() {
 		return c.JSON(result)
 	})
 
-	app.Get("/workflows/:id", func(c *fiber.Ctx) error {
+	app.Get("/tenants/:tenant_id/workflows/:id", func(c *fiber.Ctx) error {
+		tenantID := c.Params("tenant_id")
+		if tenantID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "tenant_id is required",
+			})
+		}
+
 		workflowID := c.Params("id")
 		if workflowID == "" {
 			return c.Status(400).JSON(map[string]string{
 				"error": "workflow id is required",
-			})
-		}
-
-		tenantID := c.Query("tenant_id")
-		if tenantID == "" {
-			return c.Status(400).JSON(map[string]string{
-				"error": "tenant_id query parameter is required",
 			})
 		}
 
@@ -178,27 +175,30 @@ func main() {
 		})
 	})
 
-	app.Post("/workflow-action-disable", func(c *fiber.Ctx) error {
+	app.Post("/tenants/:tenant_id/workflows/:workflow_id/actions/:key/disable", func(c *fiber.Ctx) error {
 
-		var payload struct {
-			TenantID   string `json:"tenant_id"`
-			WorkflowID string `json:"workflow_id"`
-			Key        string `json:"key"`
-		}
-
-		err = c.BodyParser(&payload)
-
-		if err != nil {
-			return err
-		}
-
-		if payload.TenantID == "" {
+		tenantID := c.Params("tenant_id")
+		if tenantID == "" {
 			return c.Status(400).JSON(map[string]string{
 				"error": "tenant_id is required",
 			})
 		}
 
-		err = storage.DisableWorkflowAction(ctx, payload.TenantID, payload.WorkflowID, payload.Key)
+		workflowID := c.Params("workflow_id")
+		if workflowID == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "workflow_id is required",
+			})
+		}
+
+		key := c.Params("key")
+		if key == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "key is required",
+			})
+		}
+
+		err = storage.DisableWorkflowAction(ctx, tenantID, workflowID, key)
 
 		if err != nil {
 			return err
