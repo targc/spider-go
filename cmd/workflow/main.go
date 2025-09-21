@@ -24,7 +24,7 @@ func main() {
 
 	storage := worflow.Storage()
 
-	uc := usecase.NewUsecase(storage, ctx)
+	uc := usecase.NewUsecase(storage)
 	handler := apis.NewHandler(uc)
 
 	app := fiber.New()

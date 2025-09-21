@@ -29,7 +29,7 @@ func (h *Handler) DisableAction(c *fiber.Ctx) error {
 		})
 	}
 
-	err := h.usecase.DisableAction(tenantID, workflowID, key)
+	err := h.usecase.DisableAction(c.Context(), tenantID, workflowID, key)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (h *Handler) UpdateAction(c *fiber.Ctx) error {
 		Meta:       payload.Meta,
 	}
 
-	action, err := h.usecase.UpdateAction(req)
+	action, err := h.usecase.UpdateAction(c.Context(), req)
 	if err != nil {
 		return c.Status(500).JSON(map[string]string{
 			"error": "Failed to update action",

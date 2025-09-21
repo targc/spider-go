@@ -15,10 +15,11 @@ func (h *Handler) CreateFlow(c *fiber.Ctx) error {
 	}
 
 	var payload struct {
-		Name    string            `json:"name"`
-		Meta    map[string]string `json:"meta,omitempty"`
-		Actions []WorkflowAction  `json:"actions"`
-		Peers   []Peer            `json:"peers"`
+		Name        string                    `json:"name"`
+		TriggerType spider.FlowTriggerType   `json:"trigger_type"`
+		Meta        map[string]string         `json:"meta,omitempty"`
+		Actions     []WorkflowAction          `json:"actions"`
+		Peers       []Peer                    `json:"peers"`
 	}
 
 	err := c.BodyParser(&payload)
@@ -54,14 +55,15 @@ func (h *Handler) CreateFlow(c *fiber.Ctx) error {
 	}
 
 	req := &usecase.CreateFlowRequest{
-		TenantID: tenantID,
-		Name:     payload.Name,
-		Meta:     payload.Meta,
-		Actions:  actions,
-		Peers:    peers,
+		TenantID:    tenantID,
+		Name:        payload.Name,
+		TriggerType: payload.TriggerType,
+		Meta:        payload.Meta,
+		Actions:     actions,
+		Peers:       peers,
 	}
 
-	result, err := h.usecase.CreateFlow(req)
+	result, err := h.usecase.CreateFlow(c.Context(), req)
 	if err != nil {
 		return c.Status(500).JSON(map[string]string{
 			"error": "Failed to create flow",
@@ -89,7 +91,7 @@ func (h *Handler) ListFlows(c *fiber.Ctx) error {
 		pageSize = 20
 	}
 
-	result, err := h.usecase.ListFlows(tenantID, page, pageSize)
+	result, err := h.usecase.ListFlows(c.Context(), tenantID, page, pageSize)
 	if err != nil {
 		return c.Status(500).JSON(map[string]string{
 			"error": "Failed to list flows",
@@ -114,7 +116,7 @@ func (h *Handler) GetFlow(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.usecase.GetFlow(tenantID, flowID)
+	result, err := h.usecase.GetFlow(c.Context(), tenantID, flowID)
 	if err != nil {
 		return c.Status(404).JSON(map[string]string{
 			"error": "Flow not found",
@@ -140,9 +142,10 @@ func (h *Handler) UpdateFlow(c *fiber.Ctx) error {
 	}
 
 	var payload struct {
-		Name   string                `json:"name"`
-		Meta   map[string]string     `json:"meta,omitempty"`
-		Status spider.FlowStatus     `json:"status"`
+		Name        string                    `json:"name"`
+		TriggerType spider.FlowTriggerType   `json:"trigger_type"`
+		Meta        map[string]string         `json:"meta,omitempty"`
+		Status      spider.FlowStatus         `json:"status"`
 	}
 
 	err := c.BodyParser(&payload)
@@ -156,7 +159,16 @@ func (h *Handler) UpdateFlow(c *fiber.Ctx) error {
 		})
 	}
 
-	flow, err := h.usecase.UpdateFlow(tenantID, flowID, payload.Name, payload.Meta, payload.Status)
+	req := &usecase.UpdateFlowRequest{
+		TenantID:    tenantID,
+		FlowID:      flowID,
+		Name:        payload.Name,
+		TriggerType: payload.TriggerType,
+		Meta:        payload.Meta,
+		Status:      payload.Status,
+	}
+
+	flow, err := h.usecase.UpdateFlow(c.Context(), req)
 	if err != nil {
 		return c.Status(500).JSON(map[string]string{
 			"error": "Failed to update flow",
@@ -181,7 +193,7 @@ func (h *Handler) DeleteFlow(c *fiber.Ctx) error {
 		})
 	}
 
-	err := h.usecase.DeleteFlow(tenantID, flowID)
+	err := h.usecase.DeleteFlow(c.Context(), tenantID, flowID)
 	if err != nil {
 		return c.Status(500).JSON(map[string]string{
 			"error": "Failed to delete flow",

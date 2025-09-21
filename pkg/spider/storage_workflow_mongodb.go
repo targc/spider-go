@@ -633,12 +633,13 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteFlow(ctx context.Context, tenantI
 func (w *MongodDBWorkflowStorageAdapter) CreateFlow(ctx context.Context, req *CreateFlowRequest) (*Flow, error) {
 
 	flow := MDFlow{
-		ID:       req.ID,
-		Version:  1,
-		Name:     req.Name,
-		TenantID: req.TenantID,
-		Meta:     req.Meta,
-		Status:   FlowStatusDraft,
+		ID:          req.ID,
+		Version:     1,
+		Name:        req.Name,
+		TenantID:    req.TenantID,
+		TriggerType: req.TriggerType,
+		Meta:        req.Meta,
+		Status:      FlowStatusDraft,
 	}
 
 	_, err := w.workflowCollection.InsertOne(ctx, flow)
@@ -648,12 +649,13 @@ func (w *MongodDBWorkflowStorageAdapter) CreateFlow(ctx context.Context, req *Cr
 	}
 
 	return &Flow{
-		ID:       flow.ID,
-		Version:  flow.Version,
-		Name:     flow.Name,
-		TenantID: flow.TenantID,
-		Meta:     flow.Meta,
-		Status:   flow.Status,
+		ID:          flow.ID,
+		Version:     flow.Version,
+		Name:        flow.Name,
+		TenantID:    flow.TenantID,
+		TriggerType: flow.TriggerType,
+		Meta:        flow.Meta,
+		Status:      flow.Status,
 	}, nil
 }
 
@@ -682,12 +684,13 @@ func (w *MongodDBWorkflowStorageAdapter) GetFlow(ctx context.Context, tenantID, 
 	}
 
 	return &Flow{
-		ID:       flow.ID,
-		Version:  flow.Version,
-		Name:     flow.Name,
-		TenantID: flow.TenantID,
-		Meta:     flow.Meta,
-		Status:   flow.Status,
+		ID:          flow.ID,
+		Version:     flow.Version,
+		Name:        flow.Name,
+		TenantID:    flow.TenantID,
+		TriggerType: flow.TriggerType,
+		Meta:        flow.Meta,
+		Status:      flow.Status,
 	}, nil
 }
 
@@ -695,6 +698,7 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateFlow(ctx context.Context, req *Up
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "name", Value: req.Name},
+			{Key: "trigger_type", Value: req.TriggerType},
 			{Key: "meta", Value: req.Meta},
 			{Key: "status", Value: req.Status},
 		}},
@@ -737,12 +741,13 @@ func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 }
 
 type MDFlow struct {
-	ID       string            `bson:"_id"`
-	Version  uint64            `bson:"version"`
-	Name     string            `bson:"name"`
-	TenantID string            `bson:"tenant_id"`
-	Meta     map[string]string `bson:"meta,omitempty"`
-	Status   FlowStatus        `bson:"status"`
+	ID          string            `bson:"_id"`
+	Version     uint64            `bson:"version"`
+	Name        string            `bson:"name"`
+	TenantID    string            `bson:"tenant_id"`
+	TriggerType FlowTriggerType   `bson:"trigger_type"`
+	Meta        map[string]string `bson:"meta,omitempty"`
+	Status      FlowStatus        `bson:"status"`
 }
 
 type MDWorkflowAction struct {

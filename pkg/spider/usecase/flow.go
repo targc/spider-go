@@ -1,16 +1,19 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/targc/spider-go/pkg/spider"
 	"github.com/google/uuid"
 )
 
 type CreateFlowRequest struct {
-	TenantID string                 `json:"tenant_id"`
-	Name     string                 `json:"name"`
-	Meta     map[string]string      `json:"meta,omitempty"`
-	Actions  []WorkflowActionInput  `json:"actions"`
-	Peers    []PeerInput            `json:"peers"`
+	TenantID    string                 `json:"tenant_id"`
+	Name        string                 `json:"name"`
+	TriggerType spider.FlowTriggerType `json:"trigger_type"`
+	Meta        map[string]string      `json:"meta,omitempty"`
+	Actions     []WorkflowActionInput  `json:"actions"`
+	Peers       []PeerInput            `json:"peers"`
 }
 
 type WorkflowActionInput struct {
@@ -27,22 +30,32 @@ type PeerInput struct {
 	ChildKey   string `json:"child_key"`
 }
 
+type UpdateFlowRequest struct {
+	TenantID    string                 `json:"tenant_id"`
+	FlowID      string                 `json:"flow_id"`
+	Name        string                 `json:"name"`
+	TriggerType spider.FlowTriggerType `json:"trigger_type"`
+	Meta        map[string]string      `json:"meta,omitempty"`
+	Status      spider.FlowStatus      `json:"status"`
+}
+
 type FlowResponse struct {
 	FlowID   string `json:"flow_id"`
 	FlowName string `json:"flow_name"`
 }
 
-func (u *Usecase) CreateFlow(req *CreateFlowRequest) (*FlowResponse, error) {
+func (u *Usecase) CreateFlow(ctx context.Context, req *CreateFlowRequest) (*FlowResponse, error) {
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
 	}
 
-	flow, err := u.storage.CreateFlow(u.ctx, &spider.CreateFlowRequest{
-		ID:       id.String(),
-		TenantID: req.TenantID,
-		Name:     req.Name,
-		Meta:     req.Meta,
+	flow, err := u.storage.CreateFlow(ctx, &spider.CreateFlowRequest{
+		ID:          id.String(),
+		TenantID:    req.TenantID,
+		Name:        req.Name,
+		TriggerType: req.TriggerType,
+		Meta:        req.Meta,
 	})
 
 	if err != nil {
@@ -52,7 +65,7 @@ func (u *Usecase) CreateFlow(req *CreateFlowRequest) (*FlowResponse, error) {
 	workflowID := flow.ID
 
 	for _, action := range req.Actions {
-		_, err = u.storage.AddAction(u.ctx, &spider.AddActionRequest{
+		_, err = u.storage.AddAction(ctx, &spider.AddActionRequest{
 			TenantID:   req.TenantID,
 			WorkflowID: workflowID,
 			Key:        action.Key,
@@ -69,7 +82,7 @@ func (u *Usecase) CreateFlow(req *CreateFlowRequest) (*FlowResponse, error) {
 
 	for _, peer := range req.Peers {
 		err = u.storage.AddDep(
-			u.ctx,
+			ctx,
 			req.TenantID,
 			workflowID,
 			peer.ParentKey,
@@ -88,8 +101,8 @@ func (u *Usecase) CreateFlow(req *CreateFlowRequest) (*FlowResponse, error) {
 	}, nil
 }
 
-func (u *Usecase) ListFlows(tenantID string, page, pageSize int) (*spider.FlowListResponse, error) {
-	return u.storage.ListFlows(u.ctx, tenantID, page, pageSize)
+func (u *Usecase) ListFlows(ctx context.Context, tenantID string, page, pageSize int) (*spider.FlowListResponse, error) {
+	return u.storage.ListFlows(ctx, tenantID, page, pageSize)
 }
 
 type FlowDetailResponse struct {
@@ -99,13 +112,13 @@ type FlowDetailResponse struct {
 	Actions  []spider.WorkflowAction `json:"actions"`
 }
 
-func (u *Usecase) GetFlow(tenantID, flowID string) (*FlowDetailResponse, error) {
-	flow, err := u.storage.GetFlow(u.ctx, tenantID, flowID)
+func (u *Usecase) GetFlow(ctx context.Context, tenantID, flowID string) (*FlowDetailResponse, error) {
+	flow, err := u.storage.GetFlow(ctx, tenantID, flowID)
 	if err != nil {
 		return nil, err
 	}
 
-	actions, err := u.storage.GetWorkflowActions(u.ctx, tenantID, flowID)
+	actions, err := u.storage.GetWorkflowActions(ctx, tenantID, flowID)
 	if err != nil {
 		return nil, err
 	}
@@ -118,17 +131,18 @@ func (u *Usecase) GetFlow(tenantID, flowID string) (*FlowDetailResponse, error) 
 	}, nil
 }
 
-func (u *Usecase) UpdateFlow(tenantID, flowID string, name string, meta map[string]string, status spider.FlowStatus) (*spider.Flow, error) {
-	req := &spider.UpdateFlowRequest{
-		TenantID: tenantID,
-		FlowID:   flowID,
-		Name:     name,
-		Meta:     meta,
-		Status:   status,
+func (u *Usecase) UpdateFlow(ctx context.Context, req *UpdateFlowRequest) (*spider.Flow, error) {
+	storageReq := &spider.UpdateFlowRequest{
+		TenantID:    req.TenantID,
+		FlowID:      req.FlowID,
+		Name:        req.Name,
+		TriggerType: req.TriggerType,
+		Meta:        req.Meta,
+		Status:      req.Status,
 	}
-	return u.storage.UpdateFlow(u.ctx, req)
+	return u.storage.UpdateFlow(ctx, storageReq)
 }
 
-func (u *Usecase) DeleteFlow(tenantID, flowID string) error {
-	return u.storage.DeleteFlow(u.ctx, tenantID, flowID)
+func (u *Usecase) DeleteFlow(ctx context.Context, tenantID, flowID string) error {
+	return u.storage.DeleteFlow(ctx, tenantID, flowID)
 }

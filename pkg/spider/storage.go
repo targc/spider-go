@@ -47,18 +47,20 @@ type UpdateActionRequest struct {
 }
 
 type CreateFlowRequest struct {
-	ID       string            `json:"id"`
-	TenantID string            `json:"tenant_id"`
-	Name     string            `json:"name"`
-	Meta     map[string]string `json:"meta,omitempty"`
+	ID          string            `json:"id"`
+	TenantID    string            `json:"tenant_id"`
+	Name        string            `json:"name"`
+	TriggerType FlowTriggerType   `json:"trigger_type"`
+	Meta        map[string]string `json:"meta,omitempty"`
 }
 
 type UpdateFlowRequest struct {
-	TenantID string            `json:"tenant_id"`
-	FlowID   string            `json:"flow_id"`
-	Name     string            `json:"name"`
-	Meta     map[string]string `json:"meta,omitempty"`
-	Status   FlowStatus        `json:"status"`
+	TenantID    string            `json:"tenant_id"`
+	FlowID      string            `json:"flow_id"`
+	Name        string            `json:"name"`
+	TriggerType FlowTriggerType   `json:"trigger_type"`
+	Meta        map[string]string `json:"meta,omitempty"`
+	Status      FlowStatus        `json:"status"`
 }
 
 type WorkflowStorageAdapter interface {
