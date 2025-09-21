@@ -638,6 +638,7 @@ func (w *MongodDBWorkflowStorageAdapter) CreateFlow(ctx context.Context, req *Cr
 		Name:     req.Name,
 		TenantID: req.TenantID,
 		Meta:     req.Meta,
+		Status:   FlowStatusDraft,
 	}
 
 	_, err := w.workflowCollection.InsertOne(ctx, flow)
@@ -652,6 +653,7 @@ func (w *MongodDBWorkflowStorageAdapter) CreateFlow(ctx context.Context, req *Cr
 		Name:     flow.Name,
 		TenantID: flow.TenantID,
 		Meta:     flow.Meta,
+		Status:   flow.Status,
 	}, nil
 }
 
@@ -685,6 +687,7 @@ func (w *MongodDBWorkflowStorageAdapter) GetFlow(ctx context.Context, tenantID, 
 		Name:     flow.Name,
 		TenantID: flow.TenantID,
 		Meta:     flow.Meta,
+		Status:   flow.Status,
 	}, nil
 }
 
@@ -693,6 +696,7 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateFlow(ctx context.Context, req *Up
 		{Key: "$set", Value: bson.D{
 			{Key: "name", Value: req.Name},
 			{Key: "meta", Value: req.Meta},
+			{Key: "status", Value: req.Status},
 		}},
 	}
 
@@ -738,6 +742,7 @@ type MDFlow struct {
 	Name     string            `bson:"name"`
 	TenantID string            `bson:"tenant_id"`
 	Meta     map[string]string `bson:"meta,omitempty"`
+	Status   FlowStatus        `bson:"status"`
 }
 
 type MDWorkflowAction struct {

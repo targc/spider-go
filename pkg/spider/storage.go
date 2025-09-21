@@ -58,6 +58,7 @@ type UpdateFlowRequest struct {
 	FlowID   string            `json:"flow_id"`
 	Name     string            `json:"name"`
 	Meta     map[string]string `json:"meta,omitempty"`
+	Status   FlowStatus        `json:"status"`
 }
 
 type WorkflowStorageAdapter interface {

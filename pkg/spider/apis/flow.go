@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"github.com/targc/spider-go/pkg/spider"
 	"github.com/targc/spider-go/pkg/spider/usecase"
 	"github.com/gofiber/fiber/v2"
 )
@@ -139,8 +140,9 @@ func (h *Handler) UpdateFlow(c *fiber.Ctx) error {
 	}
 
 	var payload struct {
-		Name string            `json:"name"`
-		Meta map[string]string `json:"meta,omitempty"`
+		Name   string                `json:"name"`
+		Meta   map[string]string     `json:"meta,omitempty"`
+		Status spider.FlowStatus     `json:"status"`
 	}
 
 	err := c.BodyParser(&payload)
@@ -154,7 +156,7 @@ func (h *Handler) UpdateFlow(c *fiber.Ctx) error {
 		})
 	}
 
-	flow, err := h.usecase.UpdateFlow(tenantID, flowID, payload.Name, payload.Meta)
+	flow, err := h.usecase.UpdateFlow(tenantID, flowID, payload.Name, payload.Meta, payload.Status)
 	if err != nil {
 		return c.Status(500).JSON(map[string]string{
 			"error": "Failed to update flow",
