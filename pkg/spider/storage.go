@@ -27,10 +27,31 @@ type WorkflowListResponse struct {
 	PageSize  int            `json:"page_size"`
 }
 
+type AddActionRequest struct {
+	TenantID   string            `json:"tenant_id"`
+	WorkflowID string            `json:"workflow_id"`
+	Key        string            `json:"key"`
+	ActionID   string            `json:"action_id"`
+	Name       string            `json:"name"`
+	Config     map[string]string `json:"config"`
+	Map        map[string]Mapper `json:"map"`
+	Meta       map[string]string `json:"meta,omitempty"`
+}
+
+type UpdateActionRequest struct {
+	TenantID   string            `json:"tenant_id"`
+	WorkflowID string            `json:"workflow_id"`
+	Key        string            `json:"key"`
+	Name       string            `json:"name"`
+	Config     map[string]string `json:"config"`
+	Map        map[string]Mapper `json:"map"`
+	Meta       map[string]string `json:"meta,omitempty"`
+}
+
 type WorkflowStorageAdapter interface {
 	QueryWorkflowAction(ctx context.Context, tenantID, workflowID, key string) (*WorkflowAction, error)
 	QueryWorkflowActionDependencies(ctx context.Context, tenantID, workflowID, key, metaOutput string) ([]WorkflowAction, error)
-	AddAction(ctx context.Context, tenantID, workflowID, key, actionID, name string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error)
+	AddAction(ctx context.Context, req *AddActionRequest) (*WorkflowAction, error)
 	AddDep(ctx context.Context, tenantID, workflowID, key, metaOutput, key2 string) error
 	GetSessionContext(ctx context.Context, workflowID, sessionID, taskID string) (map[string]map[string]interface{}, error)
 	CreateSessionContext(ctx context.Context, workflowID, sessionID, taskID string, value map[string]map[string]interface{}) error
@@ -38,7 +59,7 @@ type WorkflowStorageAdapter interface {
 	DisableWorkflowAction(ctx context.Context, tenantID, workflowID, key string) error
 	ListWorkflows(ctx context.Context, tenantID string, page, pageSize int) (*WorkflowListResponse, error)
 	GetWorkflowActions(ctx context.Context, tenantID, workflowID string) ([]WorkflowAction, error)
-	UpdateAction(ctx context.Context, tenantID, workflowID, key, name string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error)
+	UpdateAction(ctx context.Context, req *UpdateActionRequest) (*WorkflowAction, error)
 	DeleteWorkflow(ctx context.Context, tenantID, workflowID string) error
 	Close(ctx context.Context) error
 }

@@ -134,7 +134,7 @@ func NewMongodDBWorkflowStorageAdapter(client *mongo.Client, db *mongo.Database)
 	}
 }
 
-func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID, workflowID, key, actionID, name string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, req *AddActionRequest) (*WorkflowAction, error) {
 
 	id, err := uuid.NewV7()
 
@@ -144,14 +144,14 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID
 
 	wa := MDWorkflowAction{
 		ID:         id.String(),
-		Name:       name,
-		Key:        key,
-		TenantID:   tenantID,
-		WorkflowID: workflowID,
-		ActionID:   actionID,
-		Config:     conf,
-		Map:        m,
-		Meta:       meta,
+		Name:       req.Name,
+		Key:        req.Key,
+		TenantID:   req.TenantID,
+		WorkflowID: req.WorkflowID,
+		ActionID:   req.ActionID,
+		Config:     req.Config,
+		Map:        req.Map,
+		Meta:       req.Meta,
 		Disabled:   false,
 	}
 
@@ -517,23 +517,23 @@ func (w *MongodDBWorkflowStorageAdapter) GetWorkflowActions(ctx context.Context,
 	return actions, nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, tenantID, workflowID, key, name string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, req *UpdateActionRequest) (*WorkflowAction, error) {
 
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
-			{Key: "name", Value: name},
-			{Key: "config", Value: conf},
-			{Key: "map", Value: m},
-			{Key: "meta", Value: meta},
+			{Key: "name", Value: req.Name},
+			{Key: "config", Value: req.Config},
+			{Key: "map", Value: req.Map},
+			{Key: "meta", Value: req.Meta},
 		}},
 	}
 
 	result := w.workflowActionCollection.FindOneAndUpdate(
 		ctx,
 		bson.D{
-			{Key: "tenant_id", Value: tenantID},
-			{Key: "workflow_id", Value: workflowID},
-			{Key: "key", Value: key},
+			{Key: "tenant_id", Value: req.TenantID},
+			{Key: "workflow_id", Value: req.WorkflowID},
+			{Key: "key", Value: req.Key},
 		},
 		update,
 		options.FindOneAndUpdate().SetReturnDocument(options.After),

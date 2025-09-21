@@ -77,17 +77,16 @@ func main() {
 		// TODO: validate graph & input mapper schema
 
 		for _, action := range payload.Actions {
-			_, err = storage.AddAction(
-				ctx,
-				tenantID,
-				workflowID,
-				action.Key,
-				action.ActionID,
-				action.Name,
-				action.Config,
-				action.Mapper,
-				action.Meta,
-			)
+			_, err = storage.AddAction(ctx, &spider.AddActionRequest{
+				TenantID:   tenantID,
+				WorkflowID: workflowID,
+				Key:        action.Key,
+				ActionID:   action.ActionID,
+				Name:       action.Name,
+				Config:     action.Config,
+				Map:        action.Mapper,
+				Meta:       action.Meta,
+			})
 
 			if err != nil {
 				return err
@@ -247,7 +246,15 @@ func main() {
 			return err
 		}
 
-		action, err := storage.UpdateAction(ctx, tenantID, workflowID, key, payload.Name, payload.Config, payload.Mapper, payload.Meta)
+		action, err := storage.UpdateAction(ctx, &spider.UpdateActionRequest{
+			TenantID:   tenantID,
+			WorkflowID: workflowID,
+			Key:        key,
+			Name:       payload.Name,
+			Config:     payload.Config,
+			Map:        payload.Mapper,
+			Meta:       payload.Meta,
+		})
 
 		if err != nil {
 			return c.Status(500).JSON(map[string]string{

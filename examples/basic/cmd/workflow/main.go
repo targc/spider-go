@@ -25,67 +25,64 @@ func main() {
 	}
 	workflowID := "wa"
 
-	_, err = storage.AddAction(
-		ctx,
-		tenantID,
-		workflowID,
-		"a1",
-		"test-action-a",
-		"First Action",
-		map[string]string{
+	_, err = storage.AddAction(ctx, &spider.AddActionRequest{
+		TenantID:   tenantID,
+		WorkflowID: workflowID,
+		Key:        "a1",
+		ActionID:   "test-action-a",
+		Name:       "First Action",
+		Config: map[string]string{
 			"test": "a",
 		},
-		nil,
-		nil, // meta
-	)
+		Map:  nil,
+		Meta: nil,
+	})
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = storage.AddAction(
-		ctx,
-		tenantID,
-		workflowID,
-		"a2",
-		"test-action-b",
-		"Second Action",
-		map[string]string{
+	_, err = storage.AddAction(ctx, &spider.AddActionRequest{
+		TenantID:   tenantID,
+		WorkflowID: workflowID,
+		Key:        "a2",
+		ActionID:   "test-action-b",
+		Name:       "Second Action",
+		Config: map[string]string{
 			"test": "b",
 		},
-		map[string]spider.Mapper{
+		Map: map[string]spider.Mapper{
 			"value": {
 				Mode:  spider.MapperModeExpression,
 				Value: "a1.output.value + '_updatedx1'",
 			},
 		},
-		map[string]string{ // meta
+		Meta: map[string]string{
 			"description": "Second action in the workflow",
 		},
-	)
+	})
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = storage.AddAction(
-		ctx,
-		tenantID,
-		workflowID,
-		"a3",
-		"test-action-b",
-		"Third Action",
-		map[string]string{
+	_, err = storage.AddAction(ctx, &spider.AddActionRequest{
+		TenantID:   tenantID,
+		WorkflowID: workflowID,
+		Key:        "a3",
+		ActionID:   "test-action-b",
+		Name:       "Third Action",
+		Config: map[string]string{
 			"test": "c",
 		},
-		map[string]spider.Mapper{
+		Map: map[string]spider.Mapper{
 			"value": {
 				Mode:  spider.MapperModeExpression,
 				Value: "a2.output.value + '_updatedx2'",
 			},
 		},
-		nil, // meta
-	)
+		Meta: nil,
+	})
 
 	if err != nil {
 		panic(err)
