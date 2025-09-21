@@ -26,7 +26,6 @@ type Peer struct {
 	ChildKey   string `json:"child_key"`
 }
 
-
 func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -55,6 +54,7 @@ func main() {
 		}
 
 		var payload struct {
+			Name    string           `json:"name"`
 			Actions []WorkflowAction `json:"actions"`
 			Peers   []Peer           `json:"peers"`
 		}
@@ -65,13 +65,32 @@ func main() {
 			return err
 		}
 
-		workflowUUID, err := uuid.NewV7()
-
-		if err != nil {
-			return err
+		if payload.Name == "" {
+			return c.Status(400).JSON(map[string]string{
+				"error": "name is required",
+			})
 		}
 
-		workflowID := workflowUUID.String()
+		id, err := uuid.NewV7()
+		if err != nil {
+			return c.Status(500).JSON(map[string]string{
+				"error": "Failed to generate workflow ID",
+			})
+		}
+
+		workflow, err := storage.CreateWorkflow(ctx, &spider.CreateWorkflowRequest{
+			ID:       id.String(),
+			TenantID: tenantID,
+			Name:     payload.Name,
+		})
+
+		if err != nil {
+			return c.Status(500).JSON(map[string]string{
+				"error": "Failed to create workflow",
+			})
+		}
+
+		workflowID := workflow.ID
 
 		// TODO: validate graph & input mapper schema
 
@@ -107,7 +126,8 @@ func main() {
 		}
 
 		return c.JSON(map[string]interface{}{
-			"workflow_id": workflowID,
+			"workflow_id":   workflowID,
+			"workflow_name": workflow.Name,
 		})
 	})
 
@@ -154,23 +174,25 @@ func main() {
 			})
 		}
 
-		actions, err := storage.GetWorkflowActions(ctx, tenantID, workflowID)
+		workflow, err := storage.GetWorkflow(ctx, tenantID, workflowID)
 		if err != nil {
-			return c.Status(500).JSON(map[string]string{
-				"error": "Failed to get workflow",
-			})
-		}
-
-		if len(actions) == 0 {
 			return c.Status(404).JSON(map[string]string{
 				"error": "Workflow not found",
 			})
 		}
 
+		actions, err := storage.GetWorkflowActions(ctx, tenantID, workflowID)
+		if err != nil {
+			return c.Status(500).JSON(map[string]string{
+				"error": "Failed to get workflow actions",
+			})
+		}
+
 		return c.JSON(map[string]interface{}{
-			"workflow_id": workflowID,
-			"tenant_id":   tenantID,
-			"actions":     actions,
+			"workflow_id":   workflowID,
+			"workflow_name": workflow.Name,
+			"tenant_id":     tenantID,
+			"actions":       actions,
 		})
 	})
 

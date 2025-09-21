@@ -563,7 +563,19 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, req *
 
 func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, tenantID, workflowID string) error {
 
-	_, err := w.workflowActionCollection.DeleteMany(
+	_, err := w.workflowCollection.DeleteOne(
+		ctx,
+		bson.D{
+			{Key: "_id", Value: workflowID},
+			{Key: "tenant_id", Value: tenantID},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = w.workflowActionCollection.DeleteMany(
 		ctx,
 		bson.D{
 			{Key: "tenant_id", Value: tenantID},
@@ -600,8 +612,66 @@ func (w *MongodDBWorkflowStorageAdapter) DeleteWorkflow(ctx context.Context, ten
 	return nil
 }
 
+func (w *MongodDBWorkflowStorageAdapter) CreateWorkflow(ctx context.Context, req *CreateWorkflowRequest) (*Workflowdata, error) {
+
+	workflow := MDWorkflow{
+		ID:       req.ID,
+		Name:     req.Name,
+		TenantID: req.TenantID,
+	}
+
+	_, err := w.workflowCollection.InsertOne(ctx, workflow)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Workflowdata{
+		ID:       workflow.ID,
+		Name:     workflow.Name,
+		TenantID: workflow.TenantID,
+	}, nil
+}
+
+func (w *MongodDBWorkflowStorageAdapter) GetWorkflow(ctx context.Context, tenantID, workflowID string) (*Workflowdata, error) {
+
+	result := w.workflowCollection.FindOne(
+		ctx,
+		bson.D{
+			{Key: "_id", Value: workflowID},
+			{Key: "tenant_id", Value: tenantID},
+		},
+	)
+
+	err := result.Err()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var workflow MDWorkflow
+
+	err = result.Decode(&workflow)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Workflowdata{
+		ID:       workflow.ID,
+		Name:     workflow.Name,
+		TenantID: workflow.TenantID,
+	}, nil
+}
+
 func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 	return w.client.Disconnect(ctx)
+}
+
+type MDWorkflow struct {
+	ID       string `bson:"_id"`
+	Name     string `bson:"name"`
+	TenantID string `bson:"tenant_id"`
 }
 
 type MDWorkflowAction struct {

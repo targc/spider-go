@@ -46,6 +46,18 @@ type UpdateActionRequest struct {
 	Meta       map[string]string `json:"meta,omitempty"`
 }
 
+type Workflowdata struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	TenantID string `json:"tenant_id"`
+}
+
+type CreateWorkflowRequest struct {
+	ID       string `json:"id"`
+	TenantID string `json:"tenant_id"`
+	Name     string `json:"name"`
+}
+
 type WorkflowStorageAdapter interface {
 	QueryWorkflowAction(ctx context.Context, tenantID, workflowID, key string) (*WorkflowAction, error)
 	QueryWorkflowActionDependencies(ctx context.Context, tenantID, workflowID, key, metaOutput string) ([]WorkflowAction, error)
@@ -58,6 +70,8 @@ type WorkflowStorageAdapter interface {
 	ListWorkflows(ctx context.Context, tenantID string, page, pageSize int) (*WorkflowListResponse, error)
 	GetWorkflowActions(ctx context.Context, tenantID, workflowID string) ([]WorkflowAction, error)
 	UpdateAction(ctx context.Context, req *UpdateActionRequest) (*WorkflowAction, error)
+	CreateWorkflow(ctx context.Context, req *CreateWorkflowRequest) (*Workflowdata, error)
+	GetWorkflow(ctx context.Context, tenantID, workflowID string) (*Workflowdata, error)
 	DeleteWorkflow(ctx context.Context, tenantID, workflowID string) error
 	Close(ctx context.Context) error
 }
