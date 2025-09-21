@@ -160,6 +160,12 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, req *Add
 		return nil, err
 	}
 
+	// Increment flow version when action is added
+	err = w.incrementFlowVersion(ctx, req.TenantID, req.WorkflowID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &WorkflowAction{
 		ID:         wa.ID,
 		Key:        wa.Key,
@@ -390,6 +396,12 @@ func (w *MongodDBWorkflowStorageAdapter) DisableWorkflowAction(ctx context.Conte
 		return err
 	}
 
+	// Increment flow version when action is disabled
+	err = w.incrementFlowVersion(ctx, tenantID, workflowID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -548,6 +560,12 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, req *
 		return nil, err
 	}
 
+	// Increment flow version when action is updated
+	err = w.incrementFlowVersion(ctx, req.TenantID, req.WorkflowID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &WorkflowAction{
 		ID:         wa.ID,
 		Key:        wa.Key,
@@ -616,6 +634,7 @@ func (w *MongodDBWorkflowStorageAdapter) CreateFlow(ctx context.Context, req *Cr
 
 	flow := MDFlow{
 		ID:       req.ID,
+		Version:  1,
 		Name:     req.Name,
 		TenantID: req.TenantID,
 		Meta:     req.Meta,
@@ -629,6 +648,7 @@ func (w *MongodDBWorkflowStorageAdapter) CreateFlow(ctx context.Context, req *Cr
 
 	return &Flow{
 		ID:       flow.ID,
+		Version:  flow.Version,
 		Name:     flow.Name,
 		TenantID: flow.TenantID,
 		Meta:     flow.Meta,
@@ -661,6 +681,7 @@ func (w *MongodDBWorkflowStorageAdapter) GetFlow(ctx context.Context, tenantID, 
 
 	return &Flow{
 		ID:       flow.ID,
+		Version:  flow.Version,
 		Name:     flow.Name,
 		TenantID: flow.TenantID,
 		Meta:     flow.Meta,
@@ -691,12 +712,29 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateFlow(ctx context.Context, req *Up
 	return w.GetFlow(ctx, req.TenantID, req.FlowID)
 }
 
+func (w *MongodDBWorkflowStorageAdapter) incrementFlowVersion(ctx context.Context, tenantID, workflowID string) error {
+	_, err := w.workflowCollection.UpdateOne(
+		ctx,
+		bson.D{
+			{Key: "_id", Value: workflowID},
+			{Key: "tenant_id", Value: tenantID},
+		},
+		bson.D{
+			{Key: "$inc", Value: bson.D{
+				{Key: "version", Value: 1},
+			}},
+		},
+	)
+	return err
+}
+
 func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 	return w.client.Disconnect(ctx)
 }
 
 type MDFlow struct {
 	ID       string            `bson:"_id"`
+	Version  uint64            `bson:"version"`
 	Name     string            `bson:"name"`
 	TenantID string            `bson:"tenant_id"`
 	Meta     map[string]string `bson:"meta,omitempty"`
