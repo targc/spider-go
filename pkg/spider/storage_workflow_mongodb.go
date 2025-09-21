@@ -134,7 +134,7 @@ func NewMongodDBWorkflowStorageAdapter(client *mongo.Client, db *mongo.Database)
 	}
 }
 
-func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID, workflowID, key, actionID string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID, workflowID, key, actionID, name string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
 
 	id, err := uuid.NewV7()
 
@@ -144,6 +144,7 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID
 
 	wa := MDWorkflowAction{
 		ID:         id.String(),
+		Name:       name,
 		Key:        key,
 		TenantID:   tenantID,
 		WorkflowID: workflowID,
@@ -162,10 +163,12 @@ func (w *MongodDBWorkflowStorageAdapter) AddAction(ctx context.Context, tenantID
 
 	return &WorkflowAction{
 		ID:         wa.ID,
+		Name:       wa.Name,
 		Key:        wa.Key,
 		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
+		Config:     wa.Config,
 		Map:        wa.Map,
 		Meta:       wa.Meta,
 		Disabled:   wa.Disabled,
@@ -230,10 +233,12 @@ func (w *MongodDBWorkflowStorageAdapter) QueryWorkflowAction(ctx context.Context
 
 	return &WorkflowAction{
 		ID:         wa.ID,
+		Name:       wa.Name,
 		Key:        wa.Key,
 		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
 		ActionID:   wa.ActionID,
+		Config:     wa.Config,
 		Map:        wa.Map,
 		Meta:       wa.Meta,
 		Disabled:   wa.Disabled,
@@ -495,6 +500,7 @@ func (w *MongodDBWorkflowStorageAdapter) GetWorkflowActions(ctx context.Context,
 
 		action := WorkflowAction{
 			ID:         wa.ID,
+			Name:       wa.Name,
 			Key:        wa.Key,
 			TenantID:   wa.TenantID,
 			WorkflowID: wa.WorkflowID,
@@ -511,10 +517,11 @@ func (w *MongodDBWorkflowStorageAdapter) GetWorkflowActions(ctx context.Context,
 	return actions, nil
 }
 
-func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, tenantID, workflowID, key string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
+func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, tenantID, workflowID, key, name string, conf map[string]string, m map[string]Mapper, meta map[string]string) (*WorkflowAction, error) {
 
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
+			{Key: "name", Value: name},
 			{Key: "config", Value: conf},
 			{Key: "map", Value: m},
 			{Key: "meta", Value: meta},
@@ -548,6 +555,7 @@ func (w *MongodDBWorkflowStorageAdapter) UpdateAction(ctx context.Context, tenan
 
 	return &WorkflowAction{
 		ID:         wa.ID,
+		Name:       wa.Name,
 		Key:        wa.Key,
 		TenantID:   wa.TenantID,
 		WorkflowID: wa.WorkflowID,
@@ -604,6 +612,7 @@ func (w *MongodDBWorkflowStorageAdapter) Close(ctx context.Context) error {
 
 type MDWorkflowAction struct {
 	ID         string            `bson:"_id"`
+	Name       string            `bson:"name"`
 	Key        string            `bson:"key"`         // Composite unique index
 	TenantID   string            `bson:"tenant_id"`   // Composite unique index
 	WorkflowID string            `bson:"workflow_id"` // Composite unique index

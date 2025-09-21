@@ -13,6 +13,7 @@ import (
 )
 
 type WorkflowAction struct {
+	Name     string                   `json:"name"`
 	Key      string                   `json:"key"`
 	ActionID string                   `json:"action_id"`
 	Config   map[string]string        `json:"config"`
@@ -82,6 +83,7 @@ func main() {
 				workflowID,
 				action.Key,
 				action.ActionID,
+				action.Name,
 				action.Config,
 				action.Mapper,
 				action.Meta,
@@ -233,6 +235,7 @@ func main() {
 		}
 
 		var payload struct {
+			Name   string                   `json:"name"`
 			Config map[string]string        `json:"config"`
 			Mapper map[string]spider.Mapper `json:"mapper"`
 			Meta   map[string]string        `json:"meta,omitempty"`
@@ -244,7 +247,7 @@ func main() {
 			return err
 		}
 
-		action, err := storage.UpdateAction(ctx, tenantID, workflowID, key, payload.Config, payload.Mapper, payload.Meta)
+		action, err := storage.UpdateAction(ctx, tenantID, workflowID, key, payload.Name, payload.Config, payload.Mapper, payload.Meta)
 
 		if err != nil {
 			return c.Status(500).JSON(map[string]string{

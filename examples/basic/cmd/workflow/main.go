@@ -31,6 +31,7 @@ func main() {
 		workflowID,
 		"a1",
 		"test-action-a",
+		"First Action",
 		map[string]string{
 			"test": "a",
 		},
@@ -48,6 +49,7 @@ func main() {
 		workflowID,
 		"a2",
 		"test-action-b",
+		"Second Action",
 		map[string]string{
 			"test": "b",
 		},
@@ -72,6 +74,7 @@ func main() {
 		workflowID,
 		"a3",
 		"test-action-b",
+		"Third Action",
 		map[string]string{
 			"test": "c",
 		},

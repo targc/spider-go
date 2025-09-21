@@ -2,6 +2,7 @@ package spider
 
 type WorkflowAction struct {
 	ID         string            `json:"id"`
+	Name       string            `json:"name"`
 	Key        string            `json:"key"`
 	TenantID   string            `json:"tenant_id"`
 	WorkflowID string            `json:"workflow_id"`
