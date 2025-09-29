@@ -264,6 +264,7 @@ func (m *NATSWorkflowMessengerAdapter) SendInputMessage(ctx context.Context, mes
 		SessionID:  message.SessionID,
 		TaskID:     message.TaskID,
 		WorkflowID: message.WorkflowID,
+		TenantID:   message.TenantID,
 		// TODO
 		// WorkflowActionID: message.WorkflowActionID,
 		Key:      message.Key,

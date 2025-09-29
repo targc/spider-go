@@ -11,6 +11,7 @@ import (
 
 type NatsTriggerMessage struct {
 	WorkflowID string `json:"workflow_id"`
+	TenantID   string `json:"tenant_id"`
 	// TODO
 	// WorkflowActionID string `json:"workflow_action_id"`
 	MetaOutput string `json:"meta_output"`
@@ -22,6 +23,7 @@ type NatsTriggerMessage struct {
 func (n NatsTriggerMessage) FromTriggerMessage(message TriggerMessage) NatsTriggerMessage {
 	return NatsTriggerMessage{
 		WorkflowID: message.WorkflowID,
+		TenantID:   message.TenantID,
 		// TODO:
 		// WorkflowActionID: message.WorkflowActionID,
 		MetaOutput: message.MetaOutput,
@@ -34,6 +36,7 @@ func (n NatsTriggerMessage) FromTriggerMessage(message TriggerMessage) NatsTrigg
 func (n *NatsTriggerMessage) ToTriggerMessage() TriggerMessage {
 	return TriggerMessage{
 		WorkflowID: n.WorkflowID,
+		TenantID:   n.TenantID,
 		// TODO
 		// WorkflowActionID: b.WorkflowActionID,
 		MetaOutput: n.MetaOutput,
@@ -47,6 +50,7 @@ type NatsOutputMessage struct {
 	SessionID  string `json:"session_id"`
 	TaskID     string `json:"task_id"`
 	WorkflowID string `json:"workflow_id"`
+	TenantID   string `json:"tenant_id"`
 	// TODO
 	// WorkflowActionID string `json:"workflow_action_id"`
 	MetaOutput string `json:"meta_output"`
@@ -60,6 +64,7 @@ func (n NatsOutputMessage) FromOutputMessage(message OutputMessage) NatsOutputMe
 		SessionID:  message.SessionID,
 		TaskID:     message.TaskID,
 		WorkflowID: message.WorkflowID,
+		TenantID:   message.TenantID,
 		// TODO:
 		// WorkflowActionID: message.WorkflowActionID,
 		MetaOutput: message.MetaOutput,
@@ -74,6 +79,7 @@ func (n *NatsOutputMessage) ToOutputMessage() OutputMessage {
 		SessionID:  n.SessionID,
 		TaskID:     n.TaskID,
 		WorkflowID: n.WorkflowID,
+		TenantID:   n.TenantID,
 		// TODO
 		// WorkflowActionID: b.WorkflowActionID,
 		MetaOutput: n.MetaOutput,
@@ -87,6 +93,7 @@ type NatsInputMessage struct {
 	SessionID  string `json:"session_id"`
 	TaskID     string `json:"task_id"`
 	WorkflowID string `json:"workflow_id"`
+	TenantID   string `json:"tenant_id"`
 	// TODO
 	// WorkflowActionID string `json:"workflow_action_id"`
 	Key      string `json:"key"`
@@ -99,6 +106,7 @@ func (n *NatsInputMessage) ToInputMessage() InputMessage {
 		SessionID:  n.SessionID,
 		TaskID:     n.TaskID,
 		WorkflowID: n.WorkflowID,
+		TenantID:   n.TenantID,
 		// TODO
 		// WorkflowActionID: n.WorkflowActionID,
 		Key:      n.Key,
